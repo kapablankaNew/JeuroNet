@@ -1,4 +1,4 @@
-package org.kapablankaNew.JeuroNet;
+package kapablankaNew.JeuroNet.MLP;
 
 import java.io.Serializable;
 import java.util.ArrayList;

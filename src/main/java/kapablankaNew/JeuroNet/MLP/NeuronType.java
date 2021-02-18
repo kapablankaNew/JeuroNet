@@ -1,4 +1,4 @@
-package org.kapablankaNew.JeuroNet;
+package kapablankaNew.JeuroNet.MLP;
 
 public enum NeuronType {
     Input,

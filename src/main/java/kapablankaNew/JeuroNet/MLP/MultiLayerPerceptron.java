@@ -1,4 +1,4 @@
-package org.kapablankaNew.JeuroNet;
+package kapablankaNew.JeuroNet.MLP;
 
 import lombok.NonNull;
 
@@ -6,15 +6,16 @@ import java.io.*;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import kapablankaNew.JeuroNet.*;
 
-public class NeuralNetwork implements Serializable {
+public class MultiLayerPerceptron implements Serializable {
     private final List<Layer> layers;
 
     private final Topology topology;
 
     private DataSet lastDataSet;
 
-    public NeuralNetwork(Topology topology) {
+    public MultiLayerPerceptron(Topology topology) {
         this.topology = topology;
         lastDataSet = null;
         layers = new ArrayList<>();
@@ -67,12 +68,12 @@ public class NeuralNetwork implements Serializable {
     }
 
     @NonNull
-    public List<Neuron> predict(List<Double> inputSignals) throws NeuralNetworkException, DataSetException {
+    public List<Neuron> predict(List<Double> inputSignals) throws MultiLayerPerceptronException, DataSetException {
         if (lastDataSet == null) {
-            throw new NeuralNetworkException("Neural network isn't trained");
+            throw new MultiLayerPerceptronException("Neural network isn't trained");
         }
         if (inputSignals.size() != topology.getInputCount()) {
-            throw new NeuralNetworkException("The number of input signals not equals " +
+            throw new MultiLayerPerceptronException("The number of input signals not equals " +
                     "to the number of inputs of neural network!");
         }
         //scaling input signals
@@ -116,9 +117,9 @@ public class NeuralNetwork implements Serializable {
     }
 
     //method for the correction of weights
-    public void learnBackPropagation(DataSet dataSet, int numberOfSteps) throws NeuralNetworkException {
+    public void learnBackPropagation(DataSet dataSet, int numberOfSteps) throws MultiLayerPerceptronException {
         if (dataSet.getInputCount() != topology.getInputCount()) {
-            throw new NeuralNetworkException("The number of input signals in dataset not equals " +
+            throw new MultiLayerPerceptronException("The number of input signals in dataset not equals " +
                     "to the number of inputs of the trained neural network!");
         }
         lastDataSet = dataSet;
@@ -183,12 +184,12 @@ public class NeuralNetwork implements Serializable {
     }
 
     //this method allowed to load the neural network from the specified file
-    public static NeuralNetwork load(String path) throws IOException, ClassNotFoundException {
+    public static MultiLayerPerceptron load(String path) throws IOException, ClassNotFoundException {
         FileInputStream fileInputStream = new FileInputStream(path);
         ObjectInputStream objectInputStream = new ObjectInputStream(fileInputStream);
-        NeuralNetwork neuralNetwork = (NeuralNetwork) objectInputStream.readObject();
+        MultiLayerPerceptron MLP = (MultiLayerPerceptron) objectInputStream.readObject();
         objectInputStream.close();
         fileInputStream.close();
-        return neuralNetwork;
+        return MLP;
     }
 }

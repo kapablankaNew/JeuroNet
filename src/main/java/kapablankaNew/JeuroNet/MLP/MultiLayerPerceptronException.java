@@ -1,7 +1,7 @@
-package org.kapablankaNew.JeuroNet;
+package kapablankaNew.JeuroNet.MLP;
 
-public class NeuralNetworkException extends Exception {
-    public NeuralNetworkException(String Message) {
+public class MultiLayerPerceptronException extends Exception {
+    public MultiLayerPerceptronException(String Message) {
         super(Message);
     }
 

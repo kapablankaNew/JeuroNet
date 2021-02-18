@@ -1,4 +1,4 @@
-package org.kapablankaNew.JeuroNet;
+package kapablankaNew.JeuroNet.MLP;
 
 public class TopologyException extends Exception {
     public TopologyException(String Message) {
