@@ -1,5 +1,7 @@
 package kapablankaNew.JeuroNet.MLP;
 
+import lombok.NonNull;
+
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
@@ -14,7 +16,7 @@ public class Topology implements Serializable {
 
     private final double learningRate;
 
-    public Topology(int inputCount, int outputCount, int[] layers, double learningRate) throws TopologyException {
+    public Topology(int inputCount, int outputCount, @NonNull int[] layers, double learningRate) throws TopologyException {
         if (inputCount <= 0) {
             throw new TopologyException("Number of inputs must be greater than 0");
         }
@@ -38,7 +40,7 @@ public class Topology implements Serializable {
     }
 
     public Topology(int inputCount, int outputCount, double learningRate) throws TopologyException {
-        this(inputCount, outputCount, null, learningRate);
+        this(inputCount, outputCount, new int[]{outputCount}, learningRate);
     }
 
     public double getLearningRate() {

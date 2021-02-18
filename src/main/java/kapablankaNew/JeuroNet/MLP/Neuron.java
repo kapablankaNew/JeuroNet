@@ -3,7 +3,7 @@ package kapablankaNew.JeuroNet.MLP;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Random;
+import java.util.concurrent.ThreadLocalRandom;
 
 public class Neuron implements Serializable {
     //list of weights of the synapses between current neuron and previous layer
@@ -24,7 +24,7 @@ public class Neuron implements Serializable {
         //any input neuron have only 1 input with weight = 1
         //this neuron only accepts input data
         //and translate this data to all the neurons of the first hidden layer
-        if (neuronType ==  NeuronType.Input) {
+        if (neuronType == NeuronType.Input) {
             weights.add(1.0);
             inputs.add(1.0);
         } else {
@@ -46,11 +46,9 @@ public class Neuron implements Serializable {
     }
 
     private void initWeightsRandomValues(int inputCount) {
-        Random random = new Random();
         for (int i = 0; i < inputCount; i++) {
-            //Random.nextDouble() return value between 0 and 1
-            //using simple conversion, getting result between -1 and 1
-            weights.add(random.nextDouble() * 2 - 1.0);
+            //getting random weights between -1 and 1
+            weights.add(ThreadLocalRandom.current().nextDouble(-1, 1));
             inputs.add(0.0);
         }
     }
