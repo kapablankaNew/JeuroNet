@@ -6,6 +6,8 @@ import java.io.*;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
+
 import kapablankaNew.JeuroNet.*;
 
 public class MultiLayerPerceptron implements Serializable {
@@ -68,7 +70,7 @@ public class MultiLayerPerceptron implements Serializable {
     }
 
     @NonNull
-    public List<Neuron> predict(List<Double> inputSignals) throws MultiLayerPerceptronException, DataSetException {
+    public List<Double> predict(List<Double> inputSignals) throws MultiLayerPerceptronException, DataSetException {
         if (lastDataSet == null) {
             throw new MultiLayerPerceptronException("Neural network isn't trained");
         }
@@ -82,8 +84,10 @@ public class MultiLayerPerceptron implements Serializable {
         sendSignalsToInputNeurons(inputSignals);
         //after this go through all the other layers
         feedForwardAllLayersAfterInput();
-        //return list of output neurons
-        return layers.get(layers.size() - 1).getNeurons();
+        //return list of outputs
+        return layers.get(layers.size() - 1).getNeurons().stream().
+                map(Neuron::getResult).
+                collect(Collectors.toList());
     }
 
     private void predictLearning(List<Double> inputSignals) {
