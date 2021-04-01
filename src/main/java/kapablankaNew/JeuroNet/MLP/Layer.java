@@ -1,5 +1,7 @@
 package kapablankaNew.JeuroNet.MLP;
 
+import kapablankaNew.JeuroNet.Mathematical.ActivationFunction;
+
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
@@ -10,13 +12,24 @@ public class Layer implements Serializable {
 
     private final NeuronType layerType;
 
-    public Layer(List<Neuron> neurons, NeuronType type) {
+    private final ActivationFunction activationFunction;
+
+    public Layer(List<Neuron> neurons, NeuronType type, ActivationFunction activationFunction) {
         this.neurons = neurons;
+        this.activationFunction = activationFunction;
         layerType = type;
     }
 
+    public Layer(List<Neuron> neurons, NeuronType type) {
+        this(neurons, type, ActivationFunction.SIGMOID);
+    }
+
+    public Layer(List<Neuron> neurons, ActivationFunction activationFunction){
+        this(neurons, NeuronType.Normal, activationFunction);
+    }
+
     public Layer(List<Neuron> neurons) {
-        this(neurons, NeuronType.Normal);
+        this(neurons, NeuronType.Normal, ActivationFunction.SIGMOID);
     }
 
     public NeuronType getLayerType() {
@@ -29,6 +42,10 @@ public class Layer implements Serializable {
 
     public Neuron getNeuron(int index) {
         return neurons.get(index);
+    }
+
+    public ActivationFunction getActivationFunction() {
+        return activationFunction;
     }
 
     public int getCount() {

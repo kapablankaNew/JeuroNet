@@ -1,5 +1,7 @@
 package kapablankaNew.JeuroNet.MLP;
 
+import kapablankaNew.JeuroNet.Mathematical.ActivationFunction;
+
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
@@ -9,6 +11,8 @@ public class Neuron implements Serializable {
     //list of weights of the synapses between current neuron and previous layer
     private final List<Double> weights;
 
+    private final ActivationFunction activationFunction;
+
     private final NeuronType neuronType;
     //list for storage last inputs signals
     private final List<Double> inputs;
@@ -17,7 +21,8 @@ public class Neuron implements Serializable {
     //variable for storage value of error
     private double delta;
 
-    public Neuron(int inputCount, NeuronType type) {
+
+    public Neuron(int inputCount, NeuronType type, ActivationFunction activationFunction) {
         neuronType = type;
         weights = new ArrayList<>();
         inputs = new ArrayList<>();
@@ -31,8 +36,12 @@ public class Neuron implements Serializable {
             //another neurons have several inputs with random weights
             initWeightsRandomValues(inputCount);
         }
+        this.activationFunction = activationFunction;
     }
 
+    public Neuron(int inputCount, NeuronType type) {
+        this(inputCount, type, ActivationFunction.SIGMOID);
+    }
     public Neuron(int inputCount) {
         this(inputCount, NeuronType.Normal);
     }

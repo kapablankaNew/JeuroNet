@@ -1,5 +1,6 @@
 package kapablankaNew.JeuroNet.MLP;
 
+import kapablankaNew.JeuroNet.Mathematical.ActivationFunction;
 import lombok.NonNull;
 
 import java.io.*;
@@ -17,8 +18,11 @@ public class MultiLayerPerceptron implements Serializable {
 
     private DataSet lastDataSet;
 
-    public MultiLayerPerceptron(Topology topology) {
+    private final boolean scalingData;
+
+    public MultiLayerPerceptron(Topology topology, boolean scalingData) {
         this.topology = topology;
+        this.scalingData = scalingData;
         lastDataSet = null;
         layers = new ArrayList<>();
         createInputLayer();
@@ -26,31 +30,37 @@ public class MultiLayerPerceptron implements Serializable {
         createOutputLayer();
     }
 
+    public MultiLayerPerceptron(Topology topology) {
+        this(topology, false);
+    }
+
     private void createInputLayer() {
         List<Neuron> inputNeurons = new ArrayList<>();
         //filling the layer with neurons
         for (int i = 0; i < topology.getInputCount(); i++) {
             //input neuron always have 1 input
-            Neuron neuron = new Neuron(1, NeuronType.Input);
+            Neuron neuron = new Neuron(1, NeuronType.Input, ActivationFunction.LINEAR);
             inputNeurons.add(neuron);
         }
         //creating layer ad adding this in list of layers
-        Layer inputLayer = new Layer(inputNeurons, NeuronType.Input);
+        Layer inputLayer = new Layer(inputNeurons, NeuronType.Input, ActivationFunction.LINEAR);
         layers.add(inputLayer);
     }
 
     private void createHiddenLayers() {
-        for (int i = 0; i < topology.getHiddenLayers().size(); i++) {
+        for (int i = 0; i < topology.getHiddenLayersInfos().size(); i++) {
             List<Neuron> hiddenNeurons = new ArrayList<>();
             //getting last layer (its size is the number of inputs of each neuron in this layer layer)
             Layer lastLayer = layers.get(layers.size() - 1);
             //filling the layer with neurons
             for (int j = 0; j < topology.getCountOfNeuronsInLayer(i); j++) {
-                Neuron neuron = new Neuron(lastLayer.getCount());
+                Neuron neuron = new Neuron(lastLayer.getCount(), NeuronType.Normal,
+                        topology.getHiddenLayersInfos().get(i).getActivationFunction());
                 hiddenNeurons.add(neuron);
             }
             //creating layer ad adding this in list of layers
-            Layer hiddenLayer = new Layer(hiddenNeurons);
+            Layer hiddenLayer = new Layer(hiddenNeurons, NeuronType.Normal,
+                    topology.getHiddenLayersInfos().get(i).getActivationFunction());
             layers.add(hiddenLayer);
         }
     }
@@ -61,11 +71,13 @@ public class MultiLayerPerceptron implements Serializable {
         Layer lastLayer = layers.get(layers.size() - 1);
         //filling the layer with neurons
         for (int i = 0; i < topology.getOutputCount(); i++) {
-            Neuron neuron = new Neuron(lastLayer.getCount(), NeuronType.Output);
+            Neuron neuron = new Neuron(lastLayer.getCount(), NeuronType.Output,
+                    topology.getOutputLayerInfo().getActivationFunction());
             outputNeurons.add(neuron);
         }
         //creating layer ad adding this in list of layers
-        Layer outputLayer = new Layer(outputNeurons, NeuronType.Output);
+        Layer outputLayer = new Layer(outputNeurons, NeuronType.Output,
+                topology.getOutputLayerInfo().getActivationFunction());
         layers.add(outputLayer);
     }
 
@@ -78,16 +90,16 @@ public class MultiLayerPerceptron implements Serializable {
             throw new MultiLayerPerceptronException("The number of input signals not equals " +
                     "to the number of inputs of neural network!");
         }
-        //scaling input signals
-        lastDataSet.scaleEntry(inputSignals);
+        if (scalingData) {
+            //scaling input signals
+            lastDataSet.scaleEntry(inputSignals);
+        }
         //for feed forward sending signals to input neurons
         sendSignalsToInputNeurons(inputSignals);
         //after this go through all the other layers
         feedForwardAllLayersAfterInput();
         //return list of outputs
-        return layers.get(layers.size() - 1).getNeurons().stream().
-                map(Neuron::getResult).
-                collect(Collectors.toList());
+        return layers.get(layers.size() - 1).getOutputSignals();
     }
 
     private void predictLearning(List<Double> inputSignals) {
@@ -127,8 +139,10 @@ public class MultiLayerPerceptron implements Serializable {
                     "to the number of inputs of the trained neural network!");
         }
         lastDataSet = dataSet;
-        //scaling dataset
-        lastDataSet.scale();
+        if (scalingData) {
+            //scaling dataset
+            lastDataSet.scale();
+        }
         for (int i = 0; i < numberOfSteps; i++) {
             //going trough dataset
             for (int j = 0; j < dataSet.getSize(); j++) {
