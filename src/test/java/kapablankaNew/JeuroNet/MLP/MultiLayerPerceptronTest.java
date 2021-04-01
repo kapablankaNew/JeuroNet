@@ -2,6 +2,7 @@ package kapablankaNew.JeuroNet.MLP;
 
 import kapablankaNew.JeuroNet.DataSet;
 import kapablankaNew.JeuroNet.DataSetException;
+import kapablankaNew.JeuroNet.Mathematical.ActivationFunction;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -23,8 +24,12 @@ public class MultiLayerPerceptronTest {
         dataSet.addData(Arrays.asList(1.0, 0.0), Collections.singletonList(1.0));
         dataSet.addData(Arrays.asList(1.0, 1.0), Collections.singletonList(0.0));
 
+        LayerInfo outLayer = new LayerInfo(1, ActivationFunction.SIGMOID);
+        LayerInfo hiddenLayerOne = new LayerInfo(4, ActivationFunction.SIGMOID);
+        LayerInfo hiddenLayerTwo = new LayerInfo(2, ActivationFunction.SIGMOID);
         //created topology with two hidden layers with 4 and 2 neurons
-        Topology topology = new Topology(2, 1, new int[] {4, 2}, 0.01);
+        Topology topology = new Topology(2, outLayer, Arrays.asList(hiddenLayerOne,
+                hiddenLayerTwo), 0.01);
 
         //created NN
         MultiLayerPerceptron NN = new MultiLayerPerceptron(topology);

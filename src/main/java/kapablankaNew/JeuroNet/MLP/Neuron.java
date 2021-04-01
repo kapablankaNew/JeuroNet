@@ -21,6 +21,9 @@ public class Neuron implements Serializable {
     //variable for storage value of error
     private double delta;
 
+    //this value is equals to sum(Wi*xi)
+    //output is equals to activationFunction(inducedLocalField)
+    private double inducedLocalField;
 
     public Neuron(int inputCount, NeuronType type, ActivationFunction activationFunction) {
         neuronType = type;
@@ -42,6 +45,7 @@ public class Neuron implements Serializable {
     public Neuron(int inputCount, NeuronType type) {
         this(inputCount, type, ActivationFunction.SIGMOID);
     }
+
     public Neuron(int inputCount) {
         this(inputCount, NeuronType.Normal);
     }
@@ -78,22 +82,18 @@ public class Neuron implements Serializable {
         this.inputs.addAll(inputs);
 
         //calculating sum of input signals
-        double sum = 0.0;
+        inducedLocalField = 0.0;
         for (int i = 0; i < inputs.size(); i++) {
-            sum += inputs.get(i) * weights.get(i);
+            inducedLocalField += inputs.get(i) * weights.get(i);
         }
         //input neuron doesn't have activation function
         //they only translate data to all the neurons of the first hidden layer
         if (neuronType == NeuronType.Input) {
-            output = sum;
+            output = inducedLocalField;
             return;
         }
         //another neurons have sigmoid as activation function
-        output = sigmoid(sum);
-    }
-
-    private double sigmoid(double x) {
-        return 1 / (1 + Math.exp(-x));
+        output = activationFunction.function(inducedLocalField);
     }
 
     //calculating error for learning using back propagation
@@ -103,7 +103,7 @@ public class Neuron implements Serializable {
         //error = OUTi*(1 - OUTi)*(EXPECTED_OUTi - OUTi)
         //OUTi*(1 - OUTi) = d(sigmoid(x))/dx
         if (neuronType == NeuronType.Output) {
-            delta = output * (1 - output) * (expectedOutput - output);
+            delta = activationFunction.derivative(inducedLocalField) * (expectedOutput - output);
         }
     }
 
@@ -124,7 +124,7 @@ public class Neuron implements Serializable {
             sum += neuron.getDelta() * neuron.getWeights().get(currentNeuronNumber);
         }
         //calculating error
-        delta = output * (1 - output) * sum;
+        delta = activationFunction.derivative(inducedLocalField) * sum;
     }
 
     public void learnBackPropagation(double learningRate) {
