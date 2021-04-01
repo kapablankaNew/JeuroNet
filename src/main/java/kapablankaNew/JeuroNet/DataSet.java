@@ -1,5 +1,6 @@
 package kapablankaNew.JeuroNet;
 
+import lombok.Getter;
 import lombok.NonNull;
 
 import java.io.Serializable;
@@ -11,8 +12,10 @@ public class DataSet implements Serializable {
 
     private final List<List<Double>> expectedResults;
 
+    @Getter
     private final int outputCount;
 
+    @Getter
     private final int inputCount;
 
     private final List<Double> avr;
@@ -48,14 +51,6 @@ public class DataSet implements Serializable {
     @NonNull
     public List<Double> getExpectedResult(int index) {
         return expectedResults.get(index);
-    }
-
-    public int getOutputCount() {
-        return outputCount;
-    }
-
-    public int getInputCount() {
-        return inputCount;
     }
 
     public int getSize() {

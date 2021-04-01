@@ -5,12 +5,8 @@ import kapablankaNew.JeuroNet.DataSetException;
 import kapablankaNew.JeuroNet.Mathematical.ActivationFunction;
 import org.junit.Assert;
 import org.junit.Test;
-
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-
-import static org.junit.Assert.*;
 
 public class MultiLayerPerceptronTest {
 
@@ -35,7 +31,7 @@ public class MultiLayerPerceptronTest {
         MultiLayerPerceptron NN = new MultiLayerPerceptron(topology);
 
         //learn NN
-        NN.learnBackPropagation(dataSet, 500_000);
+        NN.learnBackPropagation(dataSet, 1_000_000);
 
         //check results
         Assert.assertTrue(NN.predict(Arrays.asList(0.0, 0.0)).get(0) < 0.05);

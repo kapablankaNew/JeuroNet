@@ -1,6 +1,7 @@
 package kapablankaNew.JeuroNet.MLP;
 
 import kapablankaNew.JeuroNet.Mathematical.ActivationFunction;
+import lombok.Getter;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -9,16 +10,20 @@ import java.util.concurrent.ThreadLocalRandom;
 
 public class Neuron implements Serializable {
     //list of weights of the synapses between current neuron and previous layer
+    @Getter
     private final List<Double> weights;
 
     private final ActivationFunction activationFunction;
 
     private final NeuronType neuronType;
     //list for storage last inputs signals
+    @Getter
     private final List<Double> inputs;
     //variable for storage last calculated value of output signal
+    @Getter
     private double output;
     //variable for storage value of error
+    @Getter
     private double delta;
 
     //this value is equals to sum(Wi*xi)
@@ -50,28 +55,12 @@ public class Neuron implements Serializable {
         this(inputCount, NeuronType.Normal);
     }
 
-    public double getDelta() {
-        return delta;
-    }
-
-    public List<Double> getInputs() {
-        return inputs;
-    }
-
     private void initWeightsRandomValues(int inputCount) {
         for (int i = 0; i < inputCount; i++) {
             //getting random weights between -1 and 1
             weights.add(ThreadLocalRandom.current().nextDouble(-1, 1));
             inputs.add(0.0);
         }
-    }
-
-    public List<Double> getWeights() {
-        return weights;
-    }
-
-    public double getResult() {
-        return output;
     }
 
     //we create a simple neural network, signal goes from left to right

@@ -1,6 +1,7 @@
 package kapablankaNew.JeuroNet.MLP;
 
 import kapablankaNew.JeuroNet.Mathematical.ActivationFunction;
+import lombok.Getter;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -8,10 +9,13 @@ import java.util.List;
 
 public class Layer implements Serializable {
     //list of neurons in this layer
+    @Getter
     private final List<Neuron> neurons;
 
+    @Getter
     private final NeuronType layerType;
 
+    @Getter
     private final ActivationFunction activationFunction;
 
     public Layer(List<Neuron> neurons, NeuronType type, ActivationFunction activationFunction) {
@@ -24,7 +28,7 @@ public class Layer implements Serializable {
         this(neurons, type, ActivationFunction.SIGMOID);
     }
 
-    public Layer(List<Neuron> neurons, ActivationFunction activationFunction){
+    public Layer(List<Neuron> neurons, ActivationFunction activationFunction) {
         this(neurons, NeuronType.Normal, activationFunction);
     }
 
@@ -32,20 +36,8 @@ public class Layer implements Serializable {
         this(neurons, NeuronType.Normal, ActivationFunction.SIGMOID);
     }
 
-    public NeuronType getLayerType() {
-        return layerType;
-    }
-
-    public List<Neuron> getNeurons() {
-        return neurons;
-    }
-
     public Neuron getNeuron(int index) {
         return neurons.get(index);
-    }
-
-    public ActivationFunction getActivationFunction() {
-        return activationFunction;
     }
 
     public int getCount() {
@@ -56,7 +48,7 @@ public class Layer implements Serializable {
     public List<Double> getOutputSignals() {
         List<Double> signals = new ArrayList<>();
         for (Neuron neuron : neurons) {
-            signals.add(neuron.getResult());
+            signals.add(neuron.getOutput());
         }
         return signals;
     }
