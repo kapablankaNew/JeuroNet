@@ -3,7 +3,9 @@ package kapablankaNew.JeuroNet.MLP;
 import kapablankaNew.JeuroNet.Mathematical.ActivationFunction;
 import lombok.Getter;
 
-public class LayerInfo {
+import java.io.Serializable;
+
+public class LayerInfo implements Serializable {
     @Getter
     private final int numberOfNeurons;
 

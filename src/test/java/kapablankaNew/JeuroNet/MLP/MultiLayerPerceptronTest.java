@@ -5,6 +5,8 @@ import kapablankaNew.JeuroNet.DataSetException;
 import kapablankaNew.JeuroNet.Mathematical.ActivationFunction;
 import org.junit.Assert;
 import org.junit.Test;
+
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collections;
 
@@ -38,5 +40,19 @@ public class MultiLayerPerceptronTest {
         Assert.assertTrue(NN.predict(Arrays.asList(0.0, 1.0)).get(0) > 0.95);
         Assert.assertTrue(NN.predict(Arrays.asList(1.0, 0.0)).get(0) > 0.95);
         Assert.assertTrue(NN.predict(Arrays.asList(1.0, 1.0)).get(0) < 0.05);
+    }
+
+    @Test
+    public void saveLoadTest() throws TopologyException, DataSetException, MultiLayerPerceptronException,
+            IOException, ClassNotFoundException {
+        Topology topology = new Topology(2, new LayerInfo(2, ActivationFunction.SIGMOID),
+                Collections.singletonList(new LayerInfo(2, ActivationFunction.SIGMOID)),
+                0.01);
+        DataSet dataSet = new DataSet(2, 2);
+        dataSet.addData(Arrays.asList(1.0, 2.0), Arrays.asList(0.0, 1.0));
+        MultiLayerPerceptron NN = new MultiLayerPerceptron(topology);
+        NN.learnBackPropagation(dataSet, 2);
+        NN.save("TestNN");
+        MultiLayerPerceptron NN_1 = MultiLayerPerceptron.load("TestNN");
     }
 }
