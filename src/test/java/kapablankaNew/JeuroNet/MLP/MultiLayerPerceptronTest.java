@@ -27,7 +27,7 @@ public class MultiLayerPerceptronTest {
         LayerInfo hiddenLayerTwo = new LayerInfo(2, ActivationFunction.SIGMOID);
         //created topology with two hidden layers with 4 and 2 neurons
         Topology topology = new Topology(2, outLayer, Arrays.asList(hiddenLayerOne,
-                hiddenLayerTwo), 0.01);
+                hiddenLayerTwo), 0.1);
 
         //created NN
         MultiLayerPerceptron NN = new MultiLayerPerceptron(topology);
@@ -36,10 +36,10 @@ public class MultiLayerPerceptronTest {
         NN.learnBackPropagation(dataSet, 1_000_000);
 
         //check results
-        Assert.assertTrue(NN.predict(Arrays.asList(0.0, 0.0)).get(0) < 0.05);
-        Assert.assertTrue(NN.predict(Arrays.asList(0.0, 1.0)).get(0) > 0.95);
-        Assert.assertTrue(NN.predict(Arrays.asList(1.0, 0.0)).get(0) > 0.95);
-        Assert.assertTrue(NN.predict(Arrays.asList(1.0, 1.0)).get(0) < 0.05);
+        Assert.assertTrue(NN.predict(Arrays.asList(0.0, 0.0)).get(0) < 0.1);
+        Assert.assertTrue(NN.predict(Arrays.asList(0.0, 1.0)).get(0) > 0.9);
+        Assert.assertTrue(NN.predict(Arrays.asList(1.0, 0.0)).get(0) > 0.9);
+        Assert.assertTrue(NN.predict(Arrays.asList(1.0, 1.0)).get(0) < 0.1);
     }
 
     @Test
