@@ -1,10 +1,14 @@
 package kapablankaNew.JeuroNet.Mathematical;
 
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
+@EqualsAndHashCode
 public class Vector {
     private final List<Double> elements;
 
@@ -49,5 +53,35 @@ public class Vector {
 
     public double get(int index) {
         return elements.get(index);
+    }
+
+    public Vector add(Vector vector) throws VectorMatrixException {
+        if (this.type != vector.type) {
+            throw new VectorMatrixException("It's not possible to add vector-row and vector-column!");
+        }
+        if (this.size() != vector.size()) {
+            throw new VectorMatrixException("It's not possible to add vectors of different sizes!");
+        }
+
+        List<Double> result = IntStream.range(0, size()).
+                mapToObj(i -> get(i) + vector.get(i)).
+                collect(Collectors.toList());
+
+        return new Vector(result, this.type);
+    }
+
+    public Vector sub(Vector vector) throws VectorMatrixException {
+        if (this.type != vector.type) {
+            throw new VectorMatrixException("It's not possible to add vector-row and vector-column!");
+        }
+        if (this.size() != vector.size()) {
+            throw new VectorMatrixException("It's not possible to add vectors of different sizes!");
+        }
+
+        List<Double> result = IntStream.range(0, size()).
+                mapToObj(i -> get(i) - vector.get(i)).
+                collect(Collectors.toList());
+
+        return new Vector(result, this.type);
     }
 }
