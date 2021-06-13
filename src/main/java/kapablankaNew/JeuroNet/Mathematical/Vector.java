@@ -111,4 +111,23 @@ public class Vector {
         }
         return new Matrix(this.size(), vector.size(), result);
     }
+
+    public Vector mul(Matrix matrix) throws VectorMatrixException {
+        if (this.getType() != VectorType.ROW) {
+            throw new VectorMatrixException("It's not possible to multiply vector-column and matrix!");
+        }
+        if (this.size() != matrix.getRows()) {
+            throw new VectorMatrixException("It's not possible to multiply vector and matrix with different sizes!");
+        }
+        List<Double> result = new ArrayList<>();
+
+        for (int i = 0; i < matrix.getColumns(); i++) {
+            double elem = 0.0;
+            for (int j = 0; j < matrix.getRows(); j++) {
+                elem += this.get(j) * matrix.get(j, i);
+            }
+            result.add(elem);
+        }
+        return new Vector(result, VectorType.ROW);
+    }
 }
