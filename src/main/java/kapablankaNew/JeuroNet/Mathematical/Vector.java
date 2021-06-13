@@ -4,6 +4,7 @@ import lombok.EqualsAndHashCode;
 import lombok.Getter;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -38,7 +39,7 @@ public class Vector {
     }
 
     public Vector(Vector vector) {
-        this(vector, vector.type);
+        this(vector, vector.getType());
     }
 
     public Vector(Vector vector, VectorType type) {
@@ -56,7 +57,7 @@ public class Vector {
     }
 
     public Vector add(Vector vector) throws VectorMatrixException {
-        if (this.type != vector.type) {
+        if (this.getType() != vector.getType()) {
             throw new VectorMatrixException("It's not possible to add vector-row and vector-column!");
         }
         if (this.size() != vector.size()) {
@@ -67,11 +68,11 @@ public class Vector {
                 mapToObj(i -> get(i) + vector.get(i)).
                 collect(Collectors.toList());
 
-        return new Vector(result, this.type);
+        return new Vector(result, this.getType());
     }
 
     public Vector sub(Vector vector) throws VectorMatrixException {
-        if (this.type != vector.type) {
+        if (this.getType() != vector.getType()) {
             throw new VectorMatrixException("It's not possible to add vector-row and vector-column!");
         }
         if (this.size() != vector.size()) {
@@ -82,6 +83,32 @@ public class Vector {
                 mapToObj(i -> get(i) - vector.get(i)).
                 collect(Collectors.toList());
 
-        return new Vector(result, this.type);
+        return new Vector(result, this.getType());
+    }
+
+    public Matrix mul(Vector vector) throws VectorMatrixException {
+        List<List<Double>> result = new ArrayList<>();
+        if (this.getType() == vector.getType()) {
+            throw new VectorMatrixException("It's not possible to multiply two vector-rows or two vector-columns!");
+        }
+        if (this.getType() == VectorType.ROW && vector.getType() == VectorType.COLUMN) {
+            if (this.size() != vector.size()) {
+                throw new VectorMatrixException("It's not possible to multiply vectors of different sizes!");
+            }
+            double elem = IntStream.range(0, this.size()).
+                    mapToDouble(i -> this.get(i) * vector.get(i)).
+                    sum();
+            result.add(Collections.singletonList(elem));
+            return new Matrix(1, 1, result);
+        }
+
+        for (int i = 0; i < this.size(); i++) {
+            List<Double> row = new ArrayList<>();
+            for (int j = 0; j < vector.size(); j++) {
+                row.add(this.get(i) * vector.get(j));
+            }
+            result.add(row);
+        }
+        return new Matrix(this.size(), vector.size(), result);
     }
 }
