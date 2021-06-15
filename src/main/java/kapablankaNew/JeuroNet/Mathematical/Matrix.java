@@ -68,6 +68,36 @@ public class Matrix {
         }
     }
 
+    public Matrix add(Matrix matrix) throws VectorMatrixException {
+        if (this.getRows() != matrix.getRows() || this.getColumns() != matrix.getColumns()) {
+            throw new VectorMatrixException("It's not possible to add matrices with different sizes!");
+        }
+        List<List<Double>> result = new ArrayList<>();
+        for (int i = 0; i < this.getRows(); i++) {
+            List<Double> row = new ArrayList<>();
+            for (int j = 0; j < this.getColumns(); j++) {
+                row.add(this.get(i, j) + matrix.get(i, j));
+            }
+            result.add(row);
+        }
+        return new Matrix(this.getRows(), this.getColumns(), result);
+    }
+
+    public Matrix sub(Matrix matrix) throws VectorMatrixException {
+        if (this.getRows() != matrix.getRows() || this.getColumns() != matrix.getColumns()) {
+            throw new VectorMatrixException("It's not possible to subtract matrices with different sizes!");
+        }
+        List<List<Double>> result = new ArrayList<>();
+        for (int i = 0; i < this.getRows(); i++) {
+            List<Double> row = new ArrayList<>();
+            for (int j = 0; j < this.getColumns(); j++) {
+                row.add(this.get(i, j) - matrix.get(i, j));
+            }
+            result.add(row);
+        }
+        return new Matrix(this.getRows(), this.getColumns(), result);
+    }
+
     public double get(int row, int column) {
         return elements.get(row).get(column);
     }
