@@ -98,7 +98,7 @@ public class Matrix {
         return new Matrix(this.getRows(), this.getColumns(), result);
     }
 
-    public Vector mul(Vector vector) throws VectorMatrixException{
+    public Vector mul(Vector vector) throws VectorMatrixException {
         if (vector.getType() != VectorType.COLUMN) {
             throw new VectorMatrixException("It's not possible to multiply matrix and vector-row!");
         }
@@ -116,6 +116,25 @@ public class Matrix {
         }
 
         return new Vector(result, VectorType.COLUMN);
+    }
+
+    public Matrix mul(Matrix matrix) throws VectorMatrixException {
+        if (this.getColumns() != matrix.getRows()) {
+            throw new VectorMatrixException("It's not possible to multiply matrices with different sizes!");
+        }
+        List<List<Double>> result = new ArrayList<>();
+        for (int i = 0; i < this.getRows(); i++) {
+            List<Double> row = new ArrayList<>();
+            for (int j = 0; j < matrix.getColumns(); j++) {
+                double elem = 0.0;
+                for (int k = 0; k < this.getColumns(); k++) {
+                    elem += this.get(i, k) * matrix.get(k, j);
+                }
+                row.add(elem);
+            }
+            result.add(row);
+        }
+        return new Matrix(this.getRows(), matrix.getColumns(), result);
     }
 
     public double get(int row, int column) {

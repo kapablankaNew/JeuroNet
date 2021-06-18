@@ -46,5 +46,17 @@ public class MatrixTest {
         Vector expected = new Vector(Arrays.asList(14.0, 32.0, 50.0, 68.0), VectorType.COLUMN);
 
         Assert.assertEquals(expected, res);
+
+        m1 = new Matrix(Arrays.asList(1.0, 2.0,
+                3.0, 4.0,
+                5.0, 6.0), 3, 2);
+        Matrix m2 = new Matrix(Arrays.asList(1.0, 2.0, 3.0, 4.0,
+                5.0, 6.0, 7.0, 8.0), 2, 4);
+        Matrix expectedMatrix = new Matrix(Arrays.asList(11.0, 14.0, 17.0, 20.0,
+                23.0, 30.0, 37.0, 44.0,
+                35.0, 46.0, 57.0, 68.0), 3, 4);
+        Matrix result = m1.mul(m2);
+
+        Assert.assertEquals(expectedMatrix, result);
     }
 }
