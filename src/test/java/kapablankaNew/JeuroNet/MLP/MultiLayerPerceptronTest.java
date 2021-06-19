@@ -3,6 +3,7 @@ package kapablankaNew.JeuroNet.MLP;
 import kapablankaNew.JeuroNet.DataSet;
 import kapablankaNew.JeuroNet.DataSetException;
 import kapablankaNew.JeuroNet.Mathematical.ActivationFunction;
+import kapablankaNew.JeuroNet.TopologyException;
 import org.junit.Assert;
 import org.junit.Test;
 

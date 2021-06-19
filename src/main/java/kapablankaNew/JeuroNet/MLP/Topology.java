@@ -1,6 +1,7 @@
 package kapablankaNew.JeuroNet.MLP;
 
 import kapablankaNew.JeuroNet.Mathematical.ActivationFunction;
+import kapablankaNew.JeuroNet.TopologyException;
 import lombok.Getter;
 import lombok.NonNull;
 
@@ -26,13 +27,13 @@ public class Topology implements Serializable {
 
     public Topology(int inputCount, LayerInfo outputLayerInfo, @NonNull List<LayerInfo> layers, double learningRate) throws TopologyException {
         if (inputCount <= 0) {
-            throw new TopologyException("Number of inputs must be greater than 0");
+            throw new TopologyException("Number of inputs must be greater than 0!");
         }
         if (outputLayerInfo.getNumberOfNeurons() <= 0) {
-            throw new TopologyException("Number of outputs must be greater than 0");
+            throw new TopologyException("Number of outputs must be greater than 0!");
         }
         if (learningRate <= 0) {
-            throw new TopologyException("Learning rate must be greater than 0");
+            throw new TopologyException("Learning rate must be greater than 0!");
         }
 
         this.inputCount = inputCount;
@@ -47,13 +48,13 @@ public class Topology implements Serializable {
     @Deprecated
     public Topology(int inputCount, int outputCount, @NonNull int[] layers, double learningRate) throws TopologyException {
         if (inputCount <= 0) {
-            throw new TopologyException("Number of inputs must be greater than 0");
+            throw new TopologyException("Number of inputs must be greater than 0!");
         }
         if (outputCount <= 0) {
-            throw new TopologyException("Number of outputs must be greater than 0");
+            throw new TopologyException("Number of outputs must be greater than 0!");
         }
         if (learningRate <= 0) {
-            throw new TopologyException("Learning rate must be greater than 0");
+            throw new TopologyException("Learning rate must be greater than 0!");
         }
 
         this.inputCount = inputCount;
