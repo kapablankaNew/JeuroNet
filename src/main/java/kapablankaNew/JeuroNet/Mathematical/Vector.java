@@ -2,6 +2,7 @@ package kapablankaNew.JeuroNet.Mathematical;
 
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
+import lombok.NonNull;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -38,13 +39,13 @@ public class Vector {
         this.type = type;
     }
 
-    public Vector(Vector vector) {
+    public Vector(@NonNull Vector vector) {
         this(vector, vector.getType());
     }
 
-    public Vector(Vector vector, VectorType type) {
-        elements = new ArrayList<>();
-        elements.addAll(vector.elements);
+    public Vector(@NonNull Vector vector, VectorType type) {
+        this.elements = new ArrayList<>();
+        this.elements.addAll(vector.elements);
         this.type = type;
     }
 

@@ -64,8 +64,10 @@ public class DataSet implements Serializable {
         if (results.size() != outputCount) {
             throw new DataSetException("Number of output results is not equal to output count of dataset");
         }
-        inputSignals.add(inputs);
-        expectedResults.add(results);
+        List<Double> ins = new ArrayList<>(inputs);
+        List<Double> outs = new ArrayList<>(results);
+        inputSignals.add(ins);
+        expectedResults.add(outs);
     }
 
     public void normalize() {
