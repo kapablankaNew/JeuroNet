@@ -1,5 +1,8 @@
 package kapablankaNew.JeuroNet.Mathematical;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public enum ActivationFunction {
     SIGMOID {
         @Override
@@ -47,5 +50,21 @@ public enum ActivationFunction {
     };
     public abstract double function(double x);
 
+    public Vector function(Vector x) {
+        List<Double> result = new ArrayList<>();
+        for (int i = 0; i < x.size(); i++) {
+            result.add(function(x.get(i)));
+        }
+        return new Vector(result, x.getType());
+    }
+
     public abstract double derivative(double x);
+
+    public Vector derivative(Vector x) {
+        List<Double> result = new ArrayList<>();
+        for (int i = 0; i < x.size(); i++) {
+            result.add(derivative(x.get(i)));
+        }
+        return new Vector(result, x.getType());
+    }
 }

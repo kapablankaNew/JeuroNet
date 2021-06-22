@@ -7,6 +7,7 @@ import lombok.NonNull;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -130,5 +131,14 @@ public class Vector {
             result.add(elem);
         }
         return new Vector(result, VectorType.ROW);
+    }
+
+    @Override
+    public String toString() {
+        return "[" +
+                elements.stream().
+                        map(Objects::toString).
+                        collect(Collectors.joining("; "))
+                + "]";
     }
 }

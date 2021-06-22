@@ -1,5 +1,6 @@
 package kapablankaNew.JeuroNet.Recurrent;
 
+import kapablankaNew.JeuroNet.Mathematical.ActivationFunction;
 import kapablankaNew.JeuroNet.TopologyException;
 import lombok.Getter;
 
@@ -16,7 +17,11 @@ public class RNNTopology {
     @Getter
     private final int hiddenCount;
 
-    public RNNTopology(int inputSize, int outputCount, int outputSize, int hiddenCount) throws TopologyException {
+    @Getter
+    private final ActivationFunction activationFunction;
+
+    public RNNTopology(int inputSize, int outputCount, int outputSize, int hiddenCount,
+                       ActivationFunction activationFunction) throws TopologyException {
         if (outputCount <= 0) {
             throw new TopologyException("Number of outputs must be greater than 0!");
         }
@@ -33,5 +38,6 @@ public class RNNTopology {
         this.outputCount = outputCount;
         this.outputSize = outputSize;
         this.hiddenCount = hiddenCount;
+        this.activationFunction = activationFunction;
     }
 }

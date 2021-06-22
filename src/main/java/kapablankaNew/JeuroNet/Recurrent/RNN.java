@@ -18,10 +18,7 @@ yi = Why * hi + by
 AF is activation function, in recurrent networks it's usually tanh.
  */
 
-import kapablankaNew.JeuroNet.Mathematical.Matrix;
-import kapablankaNew.JeuroNet.Mathematical.Vector;
-import kapablankaNew.JeuroNet.Mathematical.VectorMatrixException;
-import kapablankaNew.JeuroNet.Mathematical.VectorType;
+import kapablankaNew.JeuroNet.Mathematical.*;
 import lombok.NonNull;
 
 import java.util.ArrayList;
@@ -60,5 +57,36 @@ public class RNN {
             elements.add(row);
         }
         return new Matrix(rows, columns, elements);
+    }
+
+    /*
+    This method contains implementation of equations:
+    hi = AF(Wxh * xi + Whh * h(i-1) + bh)
+    yi = Why * hi + by
+    AF is activation function, in recurrent networks it's usually tanh.
+    */
+    @NonNull
+    public List<Vector> predict (List<Vector> inputSignals) throws VectorMatrixException {
+        List<Vector> result = new ArrayList<>();
+        Vector h = new Vector(topology.getHiddenCount(), VectorType.COLUMN);
+        List<Vector> y = new ArrayList<>();
+        ActivationFunction AF = topology.getActivationFunction();
+        for (Vector inputSignal : inputSignals) {
+            //Wxh * xi
+            Vector first = Wxh.mul(inputSignal);
+            //Whh * h(i-1)
+            Vector second = Whh.mul(h);
+            //Wxh * xi + Whh * h(i-1) + bh
+            Vector res = first.add(second).add(bh);
+            //hi = AF(Wxh * xi + Whh * h(i-1) + bh)
+            h = AF.function(res);
+            //yi = Why * hi + by
+            Vector yi = Why.mul(h).add(by);
+            y.add(yi);
+        }
+        for (int i = y.size() - topology.getOutputCount(); i < y.size(); i++) {
+            result.add(y.get(i));
+        }
+        return result;
     }
 }
