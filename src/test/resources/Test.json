@@ -1,0 +1,22 @@
+{
+  "this is happy": true,
+  "i am good": true,
+  "this is not happy": false,
+  "i am not good": false,
+  "this is not bad": true,
+  "i am not sad": true,
+  "i am very good": true,
+  "this is very bad": false,
+  "i am very sad": false,
+  "this is bad not good": false,
+  "this is good and happy": true,
+  "i am not good and not happy": false,
+  "i am not at all sad": true,
+  "this is not at all good": false,
+  "this is not at all bad": true,
+  "this is good right now": true,
+  "this is sad right now": false,
+  "this is very bad right now": false,
+  "this was good earlier": true,
+  "i was not happy and not good earlier": false
+}

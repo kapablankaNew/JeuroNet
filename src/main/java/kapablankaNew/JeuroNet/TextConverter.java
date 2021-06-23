@@ -62,4 +62,8 @@ public class TextConverter {
         }
         return result;
     }
+
+    public int getNumberUniqueWords() {
+        return wordsFrequency.size();
+    }
 }
