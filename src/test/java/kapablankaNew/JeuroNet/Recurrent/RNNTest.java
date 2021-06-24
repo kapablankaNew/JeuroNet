@@ -5,6 +5,7 @@ import com.github.cliftonlabs.json_simple.JsonKey;
 import com.github.cliftonlabs.json_simple.JsonObject;
 import com.github.cliftonlabs.json_simple.Jsoner;
 import kapablankaNew.JeuroNet.Mathematical.ActivationFunction;
+import kapablankaNew.JeuroNet.Mathematical.LossFunction;
 import kapablankaNew.JeuroNet.Mathematical.Vector;
 import kapablankaNew.JeuroNet.Mathematical.VectorMatrixException;
 import kapablankaNew.JeuroNet.TextConverter;
@@ -33,8 +34,12 @@ public class RNNTest {
         }
         List<Vector> ins = converter.convert("i am very good");
         RNNTopology topology = new RNNTopology(converter.getNumberUniqueWords(),
-                1, 2, 64, ActivationFunction.TANH);
+                        1, 2, 64, 0.01,
+                ActivationFunction.TANH, LossFunction.MSE);
         RNN network = new RNN(topology);
         List<Vector> res = network.predict(ins);
+        System.out.println(res.size());
+        Vector s = ActivationFunction.SOFTMAX.function(res.get(0));
+        System.out.println(s.toString());
     }
 }

@@ -13,6 +13,7 @@ import java.util.stream.IntStream;
 
 @EqualsAndHashCode
 public class Vector {
+    @Getter
     private final List<Double> elements;
 
     @Getter

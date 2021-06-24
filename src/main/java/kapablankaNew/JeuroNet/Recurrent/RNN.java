@@ -18,6 +18,7 @@ yi = Why * hi + by
 AF is activation function, in recurrent networks it's usually tanh.
  */
 
+import kapablankaNew.JeuroNet.DataSet;
 import kapablankaNew.JeuroNet.Mathematical.*;
 import lombok.NonNull;
 
@@ -37,6 +38,12 @@ public class RNN {
     private Vector bh;
 
     private Vector by;
+
+    //Next two fields storage data about last feed forward step.
+    //These data use in the learning process
+    private List<Vector> lastInputs;
+
+    private List<Vector> lastHiddenValues;
 
     public RNN (@NonNull RNNTopology topology) throws VectorMatrixException {
         this.topology = topology;
@@ -67,8 +74,11 @@ public class RNN {
     */
     @NonNull
     public List<Vector> predict (List<Vector> inputSignals) throws VectorMatrixException {
+        lastInputs = new ArrayList<>(inputSignals);
+        lastHiddenValues = new ArrayList<>();
         List<Vector> result = new ArrayList<>();
         Vector h = new Vector(topology.getHiddenCount(), VectorType.COLUMN);
+        lastHiddenValues.add(h);
         List<Vector> y = new ArrayList<>();
         ActivationFunction AF = topology.getActivationFunction();
         for (Vector inputSignal : inputSignals) {
@@ -83,10 +93,27 @@ public class RNN {
             //yi = Why * hi + by
             Vector yi = Why.mul(h).add(by);
             y.add(yi);
+            lastHiddenValues.add(h);
         }
         for (int i = y.size() - topology.getOutputCount(); i < y.size(); i++) {
             result.add(y.get(i));
         }
         return result;
+    }
+
+    public void learnBackPropagation(RNNDataset dataSet, int numberOfSteps) throws VectorMatrixException {
+        for (int j = 0; j < numberOfSteps; j++) {
+            for (int i = 0; i < dataSet.getSize(); i++) {
+                List<Vector> inputs = dataSet.getInputSignals(i);
+                List<Vector> outputs = dataSet.getExpectedOutputs(i);
+                List<Vector> result = predict(inputs);
+
+                //first of all - calculate loss function
+                List<Vector> losses = new ArrayList<>();
+                for (int k = 0; k < result.size(); k++) {
+                    losses.add(topology.getLossFunction().gradient(result.get(k), outputs.get(k)));
+                }
+            }
+        }
     }
 }
