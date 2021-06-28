@@ -58,5 +58,40 @@ public class MatrixTest {
         Matrix result = m1.mul(m2);
 
         Assert.assertEquals(expectedMatrix, result);
+
+        m1 = new Matrix(Arrays.asList(1.0, 2.0,
+                3.0, 4.0,
+                5.0, 6.0), 3, 2);
+        result = m1.mul(-2.0);
+        expectedMatrix = new Matrix(Arrays.asList(-2.0, -4.0,
+                -6.0, -8.0,
+                -10.0, -12.0), 3, 2);
+
+        Assert.assertEquals(expectedMatrix, result);
+
+        m1 = new Matrix(Arrays.asList(1.0, 2.0,
+                3.0, 4.0,
+                5.0, 6.0), 3, 2);
+        m2 = new Matrix(Arrays.asList(3.0, 4.0,
+                5.0, 6.0,
+                7.0, 8.0), 3, 2);
+        result = m1.mulElemByElem(m2);
+        expectedMatrix = new Matrix(Arrays.asList(3.0, 8.0,
+                15.0, 24.0,
+                35.0, 48.0), 3, 2);
+
+        Assert.assertEquals(expectedMatrix, result);
+    }
+
+    @Test
+    public void transposeTest() throws VectorMatrixException {
+        Matrix m1 = new Matrix(Arrays.asList(1.0, 2.0, 3.0,
+                4.0, 5.0, 6.0), 2, 3);
+        Matrix result = m1.T();
+        Matrix expectedMatrix = new Matrix(Arrays.asList(1.0, 4.0,
+                2.0, 5.0,
+                3.0, 6.0), 3, 2);
+
+        Assert.assertEquals(expectedMatrix, result);
     }
 }

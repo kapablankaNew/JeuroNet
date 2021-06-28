@@ -18,7 +18,6 @@ yi = Why * hi + by
 AF is activation function, in recurrent networks it's usually tanh.
  */
 
-import kapablankaNew.JeuroNet.DataSet;
 import kapablankaNew.JeuroNet.Mathematical.*;
 import lombok.NonNull;
 
@@ -99,21 +98,5 @@ public class RNN {
             result.add(y.get(i));
         }
         return result;
-    }
-
-    public void learnBackPropagation(RNNDataset dataSet, int numberOfSteps) throws VectorMatrixException {
-        for (int j = 0; j < numberOfSteps; j++) {
-            for (int i = 0; i < dataSet.getSize(); i++) {
-                List<Vector> inputs = dataSet.getInputSignals(i);
-                List<Vector> outputs = dataSet.getExpectedOutputs(i);
-                List<Vector> result = predict(inputs);
-
-                //first of all - calculate loss function
-                List<Vector> losses = new ArrayList<>();
-                for (int k = 0; k < result.size(); k++) {
-                    losses.add(topology.getLossFunction().gradient(result.get(k), outputs.get(k)));
-                }
-            }
-        }
     }
 }

@@ -98,6 +98,18 @@ public class Matrix {
         return new Matrix(this.getRows(), this.getColumns(), result);
     }
 
+    public Matrix mul(Double value) throws VectorMatrixException {
+        List<List<Double>> result = new ArrayList<>();
+        for (List<Double> oldRow : this.elements) {
+            List<Double> row = new ArrayList<>();
+            for (Double val : oldRow) {
+                row.add(val * value);
+            }
+            result.add(row);
+        }
+        return new Matrix(this.getRows(), this.getColumns(), result);
+    }
+
     public Vector mul(Vector vector) throws VectorMatrixException {
         if (vector.getType() != VectorType.COLUMN) {
             throw new VectorMatrixException("It's not possible to multiply matrix and vector-row!");
@@ -137,6 +149,34 @@ public class Matrix {
         return new Matrix(this.getRows(), matrix.getColumns(), result);
     }
 
+    public Matrix mulElemByElem(Matrix matrix) throws VectorMatrixException {
+        if (this.getRows() != matrix.getRows() || this.getColumns() != matrix.getColumns()) {
+            throw new VectorMatrixException("It's not possible to multiply element-by-element matrices of different sizes!");
+        }
+        List<List<Double>> result = new ArrayList<>();
+
+        for (int i = 0; i < this.getRows(); i++) {
+            List<Double> row = new ArrayList<>();
+            for (int j = 0; j < this.getColumns(); j++) {
+                row.add(this.get(i, j) * matrix.get(i, j));
+            }
+            result.add(row);
+        }
+        return new Matrix(this.getRows(), this.getColumns(), result);
+    }
+
+    //method for transposing
+    public Matrix T() throws VectorMatrixException {
+        List<List<Double>> result = new ArrayList<>();
+        for (int i = 0; i < this.getColumns(); i++) {
+            List<Double> row = new ArrayList<>();
+            for (int j = 0; j < this.getRows(); j++) {
+                row.add(this.get(j, i));
+            }
+            result.add(row);
+        }
+        return new Matrix(this.getColumns(), this.getRows(), result);
+    }
     public double get(int row, int column) {
         return elements.get(row).get(column);
     }

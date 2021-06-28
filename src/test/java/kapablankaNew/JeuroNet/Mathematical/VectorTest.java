@@ -6,8 +6,6 @@ import org.junit.Test;
 import java.util.Arrays;
 import java.util.Collections;
 
-import static org.junit.Assert.*;
-
 public class VectorTest {
 
     @Test
@@ -57,5 +55,33 @@ public class VectorTest {
         Vector expectedResult = new Vector(Arrays.asList(38.0, 44.0, 50.0, 56.0), VectorType.ROW);
 
         Assert.assertEquals(expectedResult, result);
+
+        v1 = new Vector(Arrays.asList(1.0, 2.0, 3.0), VectorType.ROW);
+        result = v1.mul(3.0);
+        expectedResult = new Vector(Arrays.asList(3.0, 6.0, 9.0), VectorType.ROW);
+
+        Assert.assertEquals(expectedResult, result);
+
+        v1 = new Vector(Arrays.asList(1.0, 2.0, 3.0), VectorType.ROW);
+        v2 = new Vector(Arrays.asList(4.0, 5.0, 6.0), VectorType.ROW);
+        result = v1.mulElemByElem(v2);
+        expectedResult = new Vector(Arrays.asList(4.0, 10.0, 18.0), VectorType.ROW);
+
+        Assert.assertEquals(expectedResult, result);
+    }
+
+    @Test
+    public void transposeTest() {
+        Vector v1 = new Vector(Arrays.asList(1.0, 2.0, 3.0), VectorType.COLUMN);
+        Vector expected = new Vector(Arrays.asList(1.0, 2.0, 3.0), VectorType.ROW);
+        Vector result = v1.T();
+
+        Assert.assertEquals(expected, result);
+
+        v1 = new Vector(Arrays.asList(3.0, 2.0, 1.0), VectorType.ROW);
+        expected = new Vector(Arrays.asList(3.0, 2.0, 1.0), VectorType.COLUMN);
+        result = v1.T();
+
+        Assert.assertEquals(expected, result);
     }
 }

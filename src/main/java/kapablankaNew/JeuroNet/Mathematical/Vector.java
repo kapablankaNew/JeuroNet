@@ -89,6 +89,14 @@ public class Vector {
         return new Vector(result, this.getType());
     }
 
+    public Vector mul(double value) {
+        List<Double> result = new ArrayList<>();
+        for (Double elem : this.getElements()) {
+            result.add(elem * value);
+        }
+        return new Vector(result, this.getType());
+    }
+
     public Matrix mul(Vector vector) throws VectorMatrixException {
         List<List<Double>> result = new ArrayList<>();
         if (this.getType() == vector.getType()) {
@@ -132,6 +140,36 @@ public class Vector {
             result.add(elem);
         }
         return new Vector(result, VectorType.ROW);
+    }
+
+    /*
+    This method using for multiplying vectors element-by-element
+    For example, if v1 is Vector [1, 2, 3], and v2 is Vector [4, 5, 6], then
+    result = v1.mulElemByElem(v2) is Vector [4, 10, 18]
+     */
+    public Vector mulElemByElem (Vector vector) throws VectorMatrixException {
+        if (this.getType() != vector.getType()) {
+            throw new VectorMatrixException("It's not possible to multiply element-by-element vector-row and vector-column! ");
+        }
+        if (this.size() != vector.size()) {
+            throw new VectorMatrixException("It's not possible to multiply element-by-element vectors of different sizes!");
+        }
+        List<Double> result = new ArrayList<>();
+        for (int i = 0; i < this.size(); i++) {
+            result.add(this.get(i) * vector.get(i));
+        }
+        return new Vector(result, this.getType());
+    }
+
+    //method for transposing
+    public Vector T() {
+        VectorType result;
+        if (this.getType() == VectorType.ROW) {
+            result = VectorType.COLUMN;
+        } else {
+            result = VectorType.ROW;
+        }
+        return new Vector(this, result);
     }
 
     @Override
