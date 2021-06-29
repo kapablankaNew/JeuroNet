@@ -34,7 +34,7 @@ public class MultiLayerPerceptronTest {
         MultiLayerPerceptron NN = new MultiLayerPerceptron(topology);
 
         //learn NN
-        NN.learnBackPropagation(dataSet, 1_000_000);
+        NN.learn(dataSet, 1_000_000);
 
         //check results
         Assert.assertTrue(NN.predict(Arrays.asList(0.0, 0.0)).get(0) < 0.1);
@@ -52,7 +52,7 @@ public class MultiLayerPerceptronTest {
         DataSet dataSet = new DataSet(2, 2);
         dataSet.addData(Arrays.asList(1.0, 2.0), Arrays.asList(0.0, 1.0));
         MultiLayerPerceptron NN = new MultiLayerPerceptron(topology);
-        NN.learnBackPropagation(dataSet, 2);
+        NN.learn(dataSet, 2);
         NN.save("TestNN");
         MultiLayerPerceptron NN_1 = MultiLayerPerceptron.load("TestNN");
     }

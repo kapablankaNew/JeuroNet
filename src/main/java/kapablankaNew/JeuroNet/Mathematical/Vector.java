@@ -172,6 +172,22 @@ public class Vector {
         return new Vector(this, result);
     }
 
+    //Method for limiting values in a vector. For example, if v1 is Vector [1, 2, 3, 4, 5]
+    //and res = v1.limit(2, 4), then res is Vector [2, 2, 3, 4, 4]
+    public Vector limit(double min, double max) {
+        List<Double> result = new ArrayList<>();
+        for (int i = 0; i < this.size(); i++) {
+            if (this.get(i) > max) {
+                result.add(max);
+            } else if (this.get(i) < min) {
+                result.add(min);
+            } else {
+                result.add(this.get(i));
+            }
+        }
+        return new Vector(result, this.getType());
+    }
+
     @Override
     public String toString() {
         return "[" +

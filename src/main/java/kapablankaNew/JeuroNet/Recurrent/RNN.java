@@ -45,6 +45,9 @@ public class RNN {
     private List<Vector> lastHiddenValues;
 
     public RNN (@NonNull RNNTopology topology) throws VectorMatrixException {
+        if (topology.getOutputCount() > 1) {
+            throw new IllegalArgumentException("Output count in this version must be 1!");
+        }
         this.topology = topology;
         Whh = createWeightsMatrix(topology.getHiddenCount(), topology.getHiddenCount());
         Wxh = createWeightsMatrix(topology.getHiddenCount(), topology.getInputSize());
@@ -98,5 +101,64 @@ public class RNN {
             result.add(y.get(i));
         }
         return result;
+    }
+
+    public void learn(RNNDataset dataSet, int numberOfSteps) throws VectorMatrixException {
+        double learningRate = topology.getLearningRate();
+        for (int j = 0; j < numberOfSteps; j++) {
+            for (int i = 0; i < dataSet.getSize(); i++) {
+                List<Vector> inputs = dataSet.getInputSignals(i);
+                List<Vector> outputs = dataSet.getExpectedOutputs(i);
+                List<Vector> result = predict(inputs);
+
+                ActivationFunction AF = topology.getActivationFunction();
+
+                //first of all - calculate loss function
+                Vector d_y = topology.getLossFunction().gradient(result.get(0), outputs.get(0));
+
+                //calculate values dE/dby and dE/dWhy
+                Matrix d_Why = d_y.mul(lastHiddenValues.get(inputs.size()).T());
+                Vector d_by = new Vector(d_y);
+
+                //it is special value: dE/dh_i. Last value: dE/dh_n = dE/dy *Why
+                Vector d_h = Why.T().mul(d_y);
+
+                //create matrices for gradients
+                Matrix d_Whh = new Matrix(Whh.getRows(), Whh.getColumns());
+                Matrix d_Wxh = new Matrix(Wxh.getRows(), Wxh.getColumns());
+                Vector d_bh = new Vector(bh.size(), bh.getType());
+                for (int k = inputs.size() - 1; k >= 0; k--) {
+                    //Wxh * xi
+                    Vector first = Wxh.mul(lastInputs.get(k));
+                    //Whh * h(i-1)
+                    Vector second = Whh.mul(lastHiddenValues.get(k+1));
+                    //Wxh * xi + Whh * h(i-1) + bh
+                    Vector res = first.add(second).add(bh);
+                    //Gradient: dhi\dWxh = dAF(x)\dx * dx\dWxh, where x = Wxh * xi + Whh * h(i-1) + bh
+                    //temp is value: dAF(x)\dx *dE\dh
+                    Vector temp = AF.derivative(res).mulElemByElem(d_h);
+
+                    d_bh = d_bh.add(temp);
+                    d_Whh = d_Whh.add(temp.mul(lastHiddenValues.get(k+1).T()));
+                    d_Wxh = d_Wxh.add(temp.mul(lastInputs.get(k).T()));
+                }
+
+                //limit the values in gradients to avoid the problem of vanishing gradients
+                d_Why = d_Why.limit(-1.0, 1.0);
+                d_by = d_by.limit(-1.0, 1.0);
+
+                d_Whh = d_Whh.limit(-1.0, 1.0);
+                d_Wxh = d_Wxh.limit(-1.0, 1.0);
+                d_bh = d_bh.limit(-1.0, 1.0);
+
+                //update parameters of RNN
+                Why = Why.sub(d_Why.mul(learningRate));
+                by = by.sub(d_by.mul(learningRate));
+
+                Whh = Whh.sub(d_Whh.mul(learningRate));
+                Wxh = Wxh.sub(d_Wxh.mul(learningRate));
+                bh = bh.sub(d_bh.mul(learningRate));
+            }
+        }
     }
 }

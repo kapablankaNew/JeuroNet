@@ -132,7 +132,7 @@ public class MultiLayerPerceptron implements Serializable {
     }
 
     //method for the correction of weights
-    public void learnBackPropagation(DataSet dataSet, int numberOfSteps) throws MultiLayerPerceptronException {
+    public void learn(DataSet dataSet, int numberOfSteps) throws MultiLayerPerceptronException {
         if (dataSet.getInputCount() != topology.getInputCount()) {
             throw new MultiLayerPerceptronException("The number of input signals in dataset not equals " +
                     "to the number of inputs of the trained neural network!");

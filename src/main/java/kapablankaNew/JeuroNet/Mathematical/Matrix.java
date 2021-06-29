@@ -5,6 +5,8 @@ import lombok.Getter;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
+import java.util.stream.Collectors;
 
 @EqualsAndHashCode
 public class Matrix {
@@ -14,6 +16,7 @@ public class Matrix {
     @Getter
     private final int columns;
 
+    @Getter
     private final List<List<Double>> elements;
 
     public Matrix(int rows, int columns) {
@@ -177,7 +180,38 @@ public class Matrix {
         }
         return new Matrix(this.getColumns(), this.getRows(), result);
     }
+
+    //Method for limiting values in a vector. For example, if m1 is Matrix [[1, 2, 3], [4, 5, 6]]
+    //and res = m1.limit(2, 4), then res is Matrix [[2, 2, 3], [4, 4, 4]]
+    public Matrix limit (double min, double max) throws VectorMatrixException {
+        List<List<Double>> result = new ArrayList<>();
+        for (int i = 0; i < this.getRows(); i++) {
+            List<Double> row = new ArrayList<>();
+            for (int j = 0; j < this.getColumns(); j++) {
+                if (this.get(i, j) > max) {
+                    row.add(max);
+                } else if (this.get(i, j) < min) {
+                    row.add(min);
+                } else {
+                    row.add(this.get(i, j));
+                }
+            }
+            result.add(row);
+        }
+        return new Matrix(this.getRows(), this.getColumns(), result);
+    }
+
     public double get(int row, int column) {
         return elements.get(row).get(column);
+    }
+
+    @Override
+    public String toString() {
+        return "[" + this.getElements().
+                stream().
+                map(s -> "[" + s.stream().
+                        map(Objects::toString).
+                        collect(Collectors.joining(",\t")) + "]").
+                collect(Collectors.joining(",\n")) + "]";
     }
 }

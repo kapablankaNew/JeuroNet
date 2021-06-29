@@ -84,4 +84,12 @@ public class VectorTest {
 
         Assert.assertEquals(expected, result);
     }
+
+    @Test
+    public void limitTest() {
+        Vector v1 = new Vector(Arrays.asList(1.0, 2.0, 3.0, 4.0, 5.0), VectorType.COLUMN);
+        Vector result = v1.limit(2.0, 3.5);
+        Vector expected = new Vector(Arrays.asList(2.0, 2.0, 3.0, 3.5, 3.5), VectorType.COLUMN);
+        Assert.assertEquals(expected, result);
+    }
 }

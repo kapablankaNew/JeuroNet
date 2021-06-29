@@ -94,4 +94,14 @@ public class MatrixTest {
 
         Assert.assertEquals(expectedMatrix, result);
     }
+
+    @Test
+    public void limitTest() throws VectorMatrixException {
+        Matrix m1 = new Matrix(Arrays.asList(1.0, 2.0, 3.0,
+                4.0, 5.0, 6.0), 2, 3);
+        Matrix result = m1.limit(2.0, 4.5);
+        Matrix expected = new Matrix(Arrays.asList(2.0, 2.0, 3.0,
+                4.0, 4.5, 4.5), 2, 3);
+        Assert.assertEquals(expected, result);
+    }
 }
