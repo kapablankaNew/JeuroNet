@@ -59,7 +59,7 @@ public class RNNDataset {
                 throw new DataSetException("Number of input signals is not equal to input size of dataset!");
             }
         }
-        if (expectedOutputs.size() != getOutputCount()) {
+        if (outputs.size() != getOutputCount()) {
             throw new DataSetException("Number of output vectors is not equal to output count of dataset!");
         }
         for (Vector output : outputs) {

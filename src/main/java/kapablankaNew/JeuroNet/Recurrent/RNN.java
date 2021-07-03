@@ -19,6 +19,7 @@ AF is activation function, in recurrent networks it's usually tanh.
  */
 
 import kapablankaNew.JeuroNet.Mathematical.*;
+import lombok.Getter;
 import lombok.NonNull;
 
 import java.util.ArrayList;
@@ -26,6 +27,7 @@ import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
 
 public class RNN {
+    @Getter
     private final RNNTopology topology;
 
     private Matrix Wxh;
@@ -61,7 +63,7 @@ public class RNN {
         for (int i = 0; i < rows; i++) {
             List<Double> row = new ArrayList<>();
             for (int j = 0; j < columns; j++) {
-                row.add(ThreadLocalRandom.current().nextDouble(0.0, 0.01));
+                row.add(ThreadLocalRandom.current().nextDouble(0.0, 0.1));
             }
             elements.add(row);
         }
@@ -93,7 +95,7 @@ public class RNN {
             //hi = AF(Wxh * xi + Whh * h(i-1) + bh)
             h = AF.function(res);
             //yi = Why * hi + by
-            Vector yi = Why.mul(h).add(by);
+            Vector yi = (Why.mul(h)).add(by);
             y.add(yi);
             lastHiddenValues.add(h);
         }
@@ -131,7 +133,7 @@ public class RNN {
                     //Wxh * xi
                     Vector first = Wxh.mul(lastInputs.get(k));
                     //Whh * h(i-1)
-                    Vector second = Whh.mul(lastHiddenValues.get(k+1));
+                    Vector second = Whh.mul(lastHiddenValues.get(k));
                     //Wxh * xi + Whh * h(i-1) + bh
                     Vector res = first.add(second).add(bh);
                     //Gradient: dhi\dWxh = dAF(x)\dx * dx\dWxh, where x = Wxh * xi + Whh * h(i-1) + bh
@@ -139,7 +141,7 @@ public class RNN {
                     Vector temp = AF.derivative(res).mulElemByElem(d_h);
 
                     d_bh = d_bh.add(temp);
-                    d_Whh = d_Whh.add(temp.mul(lastHiddenValues.get(k+1).T()));
+                    d_Whh = d_Whh.add(temp.mul(lastHiddenValues.get(k).T()));
                     d_Wxh = d_Wxh.add(temp.mul(lastInputs.get(k).T()));
                 }
 

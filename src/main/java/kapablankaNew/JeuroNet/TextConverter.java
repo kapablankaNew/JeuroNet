@@ -14,7 +14,7 @@ public class TextConverter {
     private final Map<String, Integer> wordsFrequency;
 
     public TextConverter(List<String> data) {
-        wordsFrequency = new HashMap<>();
+        wordsFrequency = new LinkedHashMap<>();
         //find all unique words and count the number of times each word occurs in the data.
         data.stream().map(s -> s.toLowerCase().split(" ")).
                 flatMap(Arrays::stream).
