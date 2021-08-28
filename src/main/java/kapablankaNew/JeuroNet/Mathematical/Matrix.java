@@ -71,6 +71,10 @@ public class Matrix {
         }
     }
 
+    public Matrix(Matrix other) throws VectorMatrixException {
+        this(other.getRows(), other.getColumns(), other.getElements());
+    }
+
     public Matrix add(Matrix matrix) throws VectorMatrixException {
         if (this.getRows() != matrix.getRows() || this.getColumns() != matrix.getColumns()) {
             throw new VectorMatrixException("It's not possible to add matrices with different sizes!");
@@ -166,6 +170,15 @@ public class Matrix {
             result.add(row);
         }
         return new Matrix(this.getRows(), this.getColumns(), result);
+    }
+
+    public Matrix pow(int n) throws VectorMatrixException {
+        if (n == 1) {
+            return new Matrix(this);
+        }
+        else {
+            return this.mul(this.pow(n - 1));
+        }
     }
 
     //method for transposing
