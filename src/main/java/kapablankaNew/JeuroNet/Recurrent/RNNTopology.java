@@ -3,8 +3,10 @@ package kapablankaNew.JeuroNet.Recurrent;
 import kapablankaNew.JeuroNet.Mathematical.ActivationFunction;
 import kapablankaNew.JeuroNet.Mathematical.LossFunction;
 import kapablankaNew.JeuroNet.TopologyException;
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 
+@EqualsAndHashCode
 public class RNNTopology {
     @Getter
     private final int inputSize;

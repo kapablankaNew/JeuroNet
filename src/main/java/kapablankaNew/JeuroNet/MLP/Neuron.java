@@ -1,6 +1,7 @@
 package kapablankaNew.JeuroNet.MLP;
 
 import kapablankaNew.JeuroNet.Mathematical.ActivationFunction;
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 
 import java.io.Serializable;
@@ -8,6 +9,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
 
+@EqualsAndHashCode
 public class Neuron implements Serializable {
     //list of weights of the synapses between current neuron and previous layer
     @Getter

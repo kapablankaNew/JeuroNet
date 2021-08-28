@@ -54,6 +54,7 @@ public class MultiLayerPerceptronTest {
         MultiLayerPerceptron NN = new MultiLayerPerceptron(topology);
         NN.learn(dataSet, 2);
         NN.save("TestNN");
-        MultiLayerPerceptron NN_1 = MultiLayerPerceptron.load("TestNN");
+        MultiLayerPerceptron NnLoaded = MultiLayerPerceptron.load("TestNN");
+        Assert.assertEquals(NN, NnLoaded);
     }
 }

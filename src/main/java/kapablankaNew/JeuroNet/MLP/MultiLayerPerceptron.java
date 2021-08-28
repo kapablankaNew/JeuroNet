@@ -1,6 +1,7 @@
 package kapablankaNew.JeuroNet.MLP;
 
 import kapablankaNew.JeuroNet.Mathematical.ActivationFunction;
+import lombok.EqualsAndHashCode;
 import lombok.NonNull;
 
 import java.io.*;
@@ -10,6 +11,7 @@ import java.util.List;
 
 import kapablankaNew.JeuroNet.*;
 
+@EqualsAndHashCode
 public class MultiLayerPerceptron implements Serializable {
     private final List<Layer> layers;
 

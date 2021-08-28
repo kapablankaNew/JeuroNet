@@ -1,12 +1,14 @@
 package kapablankaNew.JeuroNet.MLP;
 
 import kapablankaNew.JeuroNet.Mathematical.ActivationFunction;
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
+@EqualsAndHashCode
 public class Layer implements Serializable {
     //list of neurons in this layer
     @Getter

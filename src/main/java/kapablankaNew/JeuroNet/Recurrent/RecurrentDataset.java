@@ -3,12 +3,14 @@ package kapablankaNew.JeuroNet.Recurrent;
 import kapablankaNew.JeuroNet.DataSetException;
 import kapablankaNew.JeuroNet.Mathematical.Vector;
 import kapablankaNew.JeuroNet.TopologyException;
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class RNNDataset {
+@EqualsAndHashCode
+public class RecurrentDataset {
     private final List<List<Vector>> inputSignals;
 
     private final List<List<Vector>> expectedOutputs;
@@ -22,7 +24,7 @@ public class RNNDataset {
     @Getter
     private final int outputSize;
 
-    public RNNDataset(int inputSize, int outputCount, int outputSize) throws DataSetException {
+    public RecurrentDataset(int inputSize, int outputCount, int outputSize) throws DataSetException {
         if (outputCount <= 0) {
             throw new DataSetException("Number of outputs must be greater than 0!");
         }

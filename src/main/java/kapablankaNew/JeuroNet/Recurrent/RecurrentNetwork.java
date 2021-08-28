@@ -19,6 +19,7 @@ AF is activation function, in recurrent networks it's usually tanh.
  */
 
 import kapablankaNew.JeuroNet.Mathematical.*;
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NonNull;
 
@@ -26,7 +27,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
 
-public class RNN {
+@EqualsAndHashCode
+public class RecurrentNetwork {
     @Getter
     private final RNNTopology topology;
 
@@ -46,7 +48,7 @@ public class RNN {
 
     private List<Vector> lastHiddenValues;
 
-    public RNN (@NonNull RNNTopology topology) throws VectorMatrixException {
+    public RecurrentNetwork(@NonNull RNNTopology topology) throws VectorMatrixException {
         if (topology.getOutputCount() > 1) {
             throw new IllegalArgumentException("Output count in this version must be 1!");
         }
@@ -105,7 +107,7 @@ public class RNN {
         return result;
     }
 
-    public void learn(RNNDataset dataSet, int numberOfSteps) throws VectorMatrixException {
+    public void learn(RecurrentDataset dataSet, int numberOfSteps) throws VectorMatrixException {
         double learningRate = topology.getLearningRate();
         for (int j = 0; j < numberOfSteps; j++) {
             for (int i = 0; i < dataSet.getSize(); i++) {
@@ -153,7 +155,7 @@ public class RNN {
                 d_Wxh = d_Wxh.limit(-1.0, 1.0);
                 d_bh = d_bh.limit(-1.0, 1.0);
 
-                //update parameters of RNN
+                //update parameters of RecurrentNetwork
                 Why = Why.sub(d_Why.mul(learningRate));
                 by = by.sub(d_by.mul(learningRate));
 

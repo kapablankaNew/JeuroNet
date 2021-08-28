@@ -1,5 +1,6 @@
 package kapablankaNew.JeuroNet;
 
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NonNull;
 
@@ -7,6 +8,7 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
+@EqualsAndHashCode
 public class DataSet implements Serializable {
     private final List<List<Double>> inputSignals;
 

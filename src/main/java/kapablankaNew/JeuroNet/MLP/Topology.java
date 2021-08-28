@@ -2,6 +2,7 @@ package kapablankaNew.JeuroNet.MLP;
 
 import kapablankaNew.JeuroNet.Mathematical.ActivationFunction;
 import kapablankaNew.JeuroNet.TopologyException;
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NonNull;
 
@@ -10,6 +11,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+@EqualsAndHashCode
 public class Topology implements Serializable {
     //number of inputs in neural network (in first layer)
     @Getter
