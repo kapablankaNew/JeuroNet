@@ -21,7 +21,6 @@ public class RecurrentNetworkTest {
     @Test
     public void predictTest() throws IOException, JsonException, TopologyException,
             VectorMatrixException, DataSetException {
-        String filename = "src/test/resources/Train.json";
         converter = null;
         RecurrentDataset train = getDatasetFromFile("src/test/resources/Train.json");
         RecurrentDataset test = getDatasetFromFile("src/test/resources/Test.json");

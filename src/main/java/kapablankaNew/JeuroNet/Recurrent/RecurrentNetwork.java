@@ -42,13 +42,15 @@ public class RecurrentNetwork {
 
     private Vector by;
 
-    //Next two fields storage data about last feed forward step.
+    //Next three fields storage data about last feed forward step.
     //These data use in the learning process
     private List<Vector> lastInputs;
 
-    private List<Vector> lastHiddenValues;
+    private List<Vector> lastValuesH;
 
-    public RecurrentNetwork(@NonNull RNNTopology topology) throws VectorMatrixException {
+    private List<Vector> lastValuesZ;
+
+    public RecurrentNetwork (@NonNull RNNTopology topology) throws VectorMatrixException {
         if (topology.getOutputCount() > 1) {
             throw new IllegalArgumentException("Output count in this version must be 1!");
         }
@@ -74,17 +76,19 @@ public class RecurrentNetwork {
 
     /*
     This method contains implementation of equations:
-    hi = AF(Wxh * xi + Whh * h(i-1) + bh)
+    zi = Wxh * xi + Whh * h(i-1) + bh
+    hi = AF(zi)
     yi = Why * hi + by
     AF is activation function, in recurrent networks it's usually tanh.
     */
     @NonNull
     public List<Vector> predict (List<Vector> inputSignals) throws VectorMatrixException {
         lastInputs = new ArrayList<>(inputSignals);
-        lastHiddenValues = new ArrayList<>();
+        lastValuesH = new ArrayList<>();
+        lastValuesZ = new ArrayList<>();
         List<Vector> result = new ArrayList<>();
         Vector h = new Vector(topology.getHiddenCount(), VectorType.COLUMN);
-        lastHiddenValues.add(h);
+        Vector z;
         List<Vector> y = new ArrayList<>();
         ActivationFunction AF = topology.getActivationFunction();
         for (Vector inputSignal : inputSignals) {
@@ -93,13 +97,14 @@ public class RecurrentNetwork {
             //Whh * h(i-1)
             Vector second = Whh.mul(h);
             //Wxh * xi + Whh * h(i-1) + bh
-            Vector res = first.add(second).add(bh);
+            z = first.add(second).add(bh);
             //hi = AF(Wxh * xi + Whh * h(i-1) + bh)
-            h = AF.function(res);
+            h = AF.function(z);
             //yi = Why * hi + by
             Vector yi = (Why.mul(h)).add(by);
             y.add(yi);
-            lastHiddenValues.add(h);
+            lastValuesH.add(h);
+            lastValuesZ.add(z);
         }
         for (int i = y.size() - topology.getOutputCount(); i < y.size(); i++) {
             result.add(y.get(i));
@@ -112,39 +117,37 @@ public class RecurrentNetwork {
         for (int j = 0; j < numberOfSteps; j++) {
             for (int i = 0; i < dataSet.getSize(); i++) {
                 List<Vector> inputs = dataSet.getInputSignals(i);
-                List<Vector> outputs = dataSet.getExpectedOutputs(i);
+                List<Vector> expectedOutputs = dataSet.getExpectedOutputs(i);
                 List<Vector> result = predict(inputs);
 
                 ActivationFunction AF = topology.getActivationFunction();
 
-                //first of all - calculate loss function
-                Vector d_y = topology.getLossFunction().gradient(result.get(0), outputs.get(0));
+                //first - calculate loss function
+                Vector d_y = topology.getLossFunction().gradient(result.get(0), expectedOutputs.get(0));
 
                 //calculate values dE/dby and dE/dWhy
-                Matrix d_Why = d_y.mul(lastHiddenValues.get(inputs.size()).T());
+                Matrix d_Why = d_y.mul(lastValuesH.get(lastValuesH.size() - 1).T());
                 Vector d_by = new Vector(d_y);
 
-                //it is special value: dE/dh_i. Last value: dE/dh_n = dE/dy *Why
-                Vector d_h = Why.T().mul(d_y);
+                //it is special value: dE/dzi
+                Vector temp = Why.T().mul(d_y).mulElemByElem(AF.derivative(lastValuesZ.get(lastValuesZ.size() - 1)));
 
                 //create matrices for gradients
                 Matrix d_Whh = new Matrix(Whh.getRows(), Whh.getColumns());
                 Matrix d_Wxh = new Matrix(Wxh.getRows(), Wxh.getColumns());
                 Vector d_bh = new Vector(bh.size(), bh.getType());
-                for (int k = inputs.size() - 1; k >= 0; k--) {
-                    //Wxh * xi
-                    Vector first = Wxh.mul(lastInputs.get(k));
-                    //Whh * h(i-1)
-                    Vector second = Whh.mul(lastHiddenValues.get(k));
-                    //Wxh * xi + Whh * h(i-1) + bh
-                    Vector res = first.add(second).add(bh);
-                    //Gradient: dhi\dWxh = dAF(x)\dx * dx\dWxh, where x = Wxh * xi + Whh * h(i-1) + bh
-                    //temp is value: dAF(x)\dx *dE\dh
-                    Vector temp = AF.derivative(res).mulElemByElem(d_h);
 
-                    d_bh = d_bh.add(temp);
-                    d_Whh = d_Whh.add(temp.mul(lastHiddenValues.get(k).T()));
+                for (int k = inputs.size() - 1; k >= 0; k--) {
+                    Vector h_k = lastValuesH.get(k);
+                    Vector z_k = lastValuesZ.get(k);
+
+                    //update gradient values
+                    d_Whh = d_Whh.add(temp.mul(h_k.T()));
                     d_Wxh = d_Wxh.add(temp.mul(lastInputs.get(k).T()));
+                    d_bh = d_bh.add(temp);
+
+                    //dE/dzi = Whh.T * dE/dz(i+1) * dh(i+1)/dzi
+                    temp = Whh.T().mul(temp.mulElemByElem(AF.derivative(z_k)));
                 }
 
                 //limit the values in gradients to avoid the problem of vanishing gradients
@@ -155,7 +158,7 @@ public class RecurrentNetwork {
                 d_Wxh = d_Wxh.limit(-1.0, 1.0);
                 d_bh = d_bh.limit(-1.0, 1.0);
 
-                //update parameters of RecurrentNetwork
+                //update parameters of RNN
                 Why = Why.sub(d_Why.mul(learningRate));
                 by = by.sub(d_by.mul(learningRate));
 
