@@ -2,15 +2,15 @@ package kapablankaNew.JeuroNet.Recurrent;
 
 import kapablankaNew.JeuroNet.DataSetException;
 import kapablankaNew.JeuroNet.Mathematical.Vector;
-import kapablankaNew.JeuroNet.TopologyException;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
 @EqualsAndHashCode
-public class RecurrentDataset {
+public class RecurrentDataset implements Serializable {
     private final List<List<Vector>> inputSignals;
 
     private final List<List<Vector>> expectedOutputs;
@@ -47,15 +47,15 @@ public class RecurrentDataset {
         return inputSignals.size();
     }
 
-    public List<Vector> getInputSignals (int index) {
+    public List<Vector> getInputSignals(int index) {
         return inputSignals.get(index);
     }
 
-    public List<Vector> getExpectedOutputs (int index) {
+    public List<Vector> getExpectedOutputs(int index) {
         return expectedOutputs.get(index);
     }
 
-    public void addData (List<Vector> inputs, List<Vector> outputs) throws DataSetException {
+    public void addData(List<Vector> inputs, List<Vector> outputs) throws DataSetException {
         for (Vector input : inputs) {
             if (input.size() != getInputSize()) {
                 throw new DataSetException("Number of input signals is not equal to input size of dataset!");

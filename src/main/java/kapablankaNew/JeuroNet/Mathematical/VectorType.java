@@ -1,6 +1,8 @@
 package kapablankaNew.JeuroNet.Mathematical;
 
-public enum VectorType {
+import java.io.Serializable;
+
+public enum VectorType implements Serializable {
     ROW,
     COLUMN
 }

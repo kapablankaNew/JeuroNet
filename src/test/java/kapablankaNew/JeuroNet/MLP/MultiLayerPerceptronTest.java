@@ -53,8 +53,8 @@ public class MultiLayerPerceptronTest {
         dataSet.addData(Arrays.asList(1.0, 2.0), Arrays.asList(0.0, 1.0));
         MultiLayerPerceptron NN = new MultiLayerPerceptron(topology);
         NN.learn(dataSet, 2);
-        NN.save("TestNN");
-        MultiLayerPerceptron NnLoaded = MultiLayerPerceptron.load("TestNN");
+        NN.save("TestNN.jnn");
+        MultiLayerPerceptron NnLoaded = MultiLayerPerceptron.load("TestNN.jnn");
         Assert.assertEquals(NN, NnLoaded);
     }
 }

@@ -3,13 +3,14 @@ package kapablankaNew.JeuroNet.Mathematical;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
 @EqualsAndHashCode
-public class Matrix {
+public class Matrix implements Serializable {
     @Getter
     private final int rows;
 

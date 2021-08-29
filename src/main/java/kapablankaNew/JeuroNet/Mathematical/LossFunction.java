@@ -1,11 +1,12 @@
 package kapablankaNew.JeuroNet.Mathematical;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-public enum LossFunction {
+public enum LossFunction implements Serializable {
     MAE {
         @Override
         public double loss(List<Double> actual, List<Double> expected) {

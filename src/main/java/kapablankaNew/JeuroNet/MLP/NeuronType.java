@@ -1,6 +1,8 @@
 package kapablankaNew.JeuroNet.MLP;
 
-public enum NeuronType {
+import java.io.Serializable;
+
+public enum NeuronType implements Serializable {
     Input,
     Normal,
     Output

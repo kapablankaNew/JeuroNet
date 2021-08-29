@@ -1,5 +1,6 @@
 package kapablankaNew.JeuroNet;
 
+import java.io.Serializable;
 import java.util.*;
 import kapablankaNew.JeuroNet.Mathematical.Vector;
 import kapablankaNew.JeuroNet.Mathematical.VectorType;
@@ -10,7 +11,7 @@ The conversion uses a unitary code, that is, each word is converted to a vector 
 one element 1 and the other 0. The size of the vectors is equal to the number of unique words
 in the data. The case is not taken into account.
 */
-public class TextConverter {
+public class TextConverter implements Serializable {
     private final Map<String, Integer> wordsFrequency;
 
     public TextConverter(List<String> data) {

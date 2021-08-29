@@ -18,17 +18,19 @@ yi = Why * hi + by
 AF is activation function, in recurrent networks it's usually tanh.
  */
 
+import kapablankaNew.JeuroNet.MLP.MultiLayerPerceptron;
 import kapablankaNew.JeuroNet.Mathematical.*;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NonNull;
 
+import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
 
 @EqualsAndHashCode
-public class RecurrentNetwork {
+public class RecurrentNetwork implements Serializable {
     @Getter
     private final RNNTopology topology;
 
@@ -167,5 +169,30 @@ public class RecurrentNetwork {
                 bh = bh.sub(d_bh.mul(learningRate));
             }
         }
+    }
+
+    //this method allowed to save the neural network to the specified file
+    public void save(String path) throws IOException {
+        if (! path.endsWith(".jnn")) {
+            throw new IOException("Incorrect filename! File format must be '.jnn'!");
+        }
+        FileOutputStream fileOutputStream = new FileOutputStream(path);
+        ObjectOutputStream objectOutputStream = new ObjectOutputStream(fileOutputStream);
+        objectOutputStream.writeObject(this);
+        objectOutputStream.close();
+        fileOutputStream.close();
+    }
+
+    //this method allowed to load the neural network from the specified file
+    public static RecurrentNetwork load(String path) throws IOException, ClassNotFoundException {
+        if (! path.endsWith(".jnn")) {
+            throw new IOException("Incorrect filename! File format must be '.jnn'!");
+        }
+        FileInputStream fileInputStream = new FileInputStream(path);
+        ObjectInputStream objectInputStream = new ObjectInputStream(fileInputStream);
+        RecurrentNetwork NN = (RecurrentNetwork) objectInputStream.readObject();
+        objectInputStream.close();
+        fileInputStream.close();
+        return NN;
     }
 }

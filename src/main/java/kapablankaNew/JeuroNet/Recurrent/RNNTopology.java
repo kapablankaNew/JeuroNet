@@ -6,8 +6,10 @@ import kapablankaNew.JeuroNet.TopologyException;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 
+import java.io.Serializable;
+
 @EqualsAndHashCode
-public class RNNTopology {
+public class RNNTopology implements Serializable {
     @Getter
     private final int inputSize;
 
