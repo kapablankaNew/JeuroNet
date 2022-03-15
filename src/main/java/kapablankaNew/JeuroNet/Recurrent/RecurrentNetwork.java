@@ -18,8 +18,11 @@ yi = Why * hi + by
 AF is activation function, in recurrent networks it's usually tanh.
  */
 
-import kapablankaNew.JeuroNet.MLP.MultiLayerPerceptron;
-import kapablankaNew.JeuroNet.Mathematical.*;
+import kapablankaNew.JeuroNet.Mathematical.ActivationFunction;
+import kapablankaNew.JeuroNet.Mathematical.Matrix;
+import kapablankaNew.JeuroNet.Mathematical.Vector;
+import kapablankaNew.JeuroNet.Mathematical.VectorMatrixException;
+import kapablankaNew.JeuroNet.Mathematical.VectorType;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NonNull;
