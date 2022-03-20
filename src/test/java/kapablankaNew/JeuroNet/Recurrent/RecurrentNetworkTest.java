@@ -49,7 +49,7 @@ public class RecurrentNetworkTest {
                 .hiddenCount(5)
                 .learningRate(0.01).activationFunction(ActivationFunction.TANH)
                 .lossFunction(LossFunction.MSE)
-                .recurrentLayerType(RecurrentLayerType.ALL_INPUT_ALL_OUTPUT)
+                .recurrentLayerType(RecurrentLayerType.NO_INPUT_NO_OUTPUT)
                 .build();
 
         RecurrentDataset dataSet = new RecurrentDataset(3, 1, 2);

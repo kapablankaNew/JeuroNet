@@ -45,7 +45,9 @@ NO_INPUT_NO_OUTPUT:
     x0    x1    x2
 */
 
-public enum RecurrentLayerType {
+import java.io.Serializable;
+
+public enum RecurrentLayerType implements Serializable {
     ALL_INPUT_ALL_OUTPUT,
     NO_INPUT,
     NO_OUTPUT,
