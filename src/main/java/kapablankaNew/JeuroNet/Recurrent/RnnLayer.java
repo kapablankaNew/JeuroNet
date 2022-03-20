@@ -1,5 +1,23 @@
 package kapablankaNew.JeuroNet.Recurrent;
 
+/*
+This class implements simple recurrent neural network, in first variant - only with link "many to many"
+    yo    y1    y2
+    ^     ^     ^
+    |     |     |
+    h0 -> h1 -> h2 ...
+    ^     ^     ^
+    |     |     |
+    x0    x1    x2
+
+Such network have three weight arrays: Wxh for links (xi -> hi), Whh for links (h(i-1) -> hi), Why for links (hi -> yi)
+Also such network have two bias arrays: bh for calculation hi and by for calculation yi
+In mathematical form, it look like this:
+hi = AF(Wxh * xi + Whh * h(i-1) + bh)
+yi = Why * hi + by
+AF is activation function, in RNN it's usually tanh.
+ */
+
 import kapablankaNew.JeuroNet.Mathematical.ActivationFunction;
 import kapablankaNew.JeuroNet.Mathematical.Matrix;
 import kapablankaNew.JeuroNet.Mathematical.Vector;
@@ -14,7 +32,7 @@ import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
 
 public class RnnLayer implements RecurrentLayer, Serializable {
-    public RnnLayer (@NonNull RNNTopology topology) throws VectorMatrixException {
+    public RnnLayer (@NonNull RnnLayerTopology topology) throws VectorMatrixException {
         if (topology.getOutputCount() > 1) {
             throw new IllegalArgumentException("Output count in this version must be 1!");
         }
@@ -123,7 +141,7 @@ public class RnnLayer implements RecurrentLayer, Serializable {
     }
 
     @Getter
-    private final RNNTopology topology;
+    private final RnnLayerTopology topology;
 
     private Matrix Wxh;
 

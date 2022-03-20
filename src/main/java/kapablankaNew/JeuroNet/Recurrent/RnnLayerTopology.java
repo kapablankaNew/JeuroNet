@@ -3,13 +3,14 @@ package kapablankaNew.JeuroNet.Recurrent;
 import kapablankaNew.JeuroNet.Mathematical.ActivationFunction;
 import kapablankaNew.JeuroNet.Mathematical.LossFunction;
 import kapablankaNew.JeuroNet.TopologyException;
+import lombok.Builder;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 
 import java.io.Serializable;
 
 @EqualsAndHashCode
-public class RNNTopology implements Serializable {
+public class RnnLayerTopology implements Serializable {
     @Getter
     private final int inputSize;
 
@@ -31,9 +32,14 @@ public class RNNTopology implements Serializable {
     @Getter
     private final LossFunction lossFunction;
 
-    public RNNTopology(int inputSize, int outputCount, int outputSize, int hiddenCount,
-                       double learningRate, ActivationFunction activationFunction,
-                       LossFunction lossFunction) throws TopologyException {
+    @Getter
+    private final RecurrentLayerType recurrentLayerType;
+
+    @Builder
+    private RnnLayerTopology(int inputSize, int outputCount, int outputSize, int hiddenCount,
+                            double learningRate, ActivationFunction activationFunction,
+                            LossFunction lossFunction, RecurrentLayerType recurrentLayerType)
+            throws TopologyException {
         if (outputCount <= 0) {
             throw new TopologyException("Number of outputs must be greater than 0!");
         }
@@ -56,5 +62,6 @@ public class RNNTopology implements Serializable {
         this.learningRate = learningRate;
         this.lossFunction = lossFunction;
         this.activationFunction = activationFunction;
+        this.recurrentLayerType = recurrentLayerType;
     }
 }

@@ -35,7 +35,7 @@ import java.util.concurrent.ThreadLocalRandom;
 @EqualsAndHashCode
 public class RecurrentNetwork implements Serializable {
     @Getter
-    private final RNNTopology topology;
+    private final RnnLayerTopology topology;
 
     private Matrix Wxh;
 
@@ -55,7 +55,7 @@ public class RecurrentNetwork implements Serializable {
 
     private List<Vector> lastValuesZ;
 
-    public RecurrentNetwork (@NonNull RNNTopology topology) throws VectorMatrixException {
+    public RecurrentNetwork (@NonNull RnnLayerTopology topology) throws VectorMatrixException {
         if (topology.getOutputCount() > 1) {
             throw new IllegalArgumentException("Output count in this version must be 1!");
         }
