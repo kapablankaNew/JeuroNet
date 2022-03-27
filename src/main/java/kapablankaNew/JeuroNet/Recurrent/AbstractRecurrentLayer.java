@@ -6,27 +6,28 @@ import lombok.Getter;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.function.Predicate;
 
-public abstract class AbstractRecurrentLayer implements RecurrentLayer{
+public abstract class AbstractRecurrentLayer implements RecurrentLayer {
     @Getter
-    private final RnnLayerTopology topology;
+    protected final RnnLayerTopology topology;
 
-    private List<Vector> lastInputs;
+    protected List<Vector> lastInputs;
 
-    private List<Vector> lastOutputs;
+    protected List<Vector> lastOutputs;
 
-    private AbstractRecurrentLayer(RnnLayerTopology topology) {
+    protected AbstractRecurrentLayer(RnnLayerTopology topology) {
         this.topology = topology;
+        lastInputs = new ArrayList<>();
+        lastOutputs = new ArrayList<>();
     }
 
     @Override
     public abstract List<Vector> predict(List<Vector> inputSignals) throws VectorMatrixException;
 
     @Override
-    public abstract List<Vector> learn(List<Vector> inputSignals, List<Vector> errors) throws VectorMatrixException;
+    public abstract List<Vector> learn(List<Vector> inputSignals, List<Vector> errorsGradients) throws VectorMatrixException;
 
-    private void updateInputs() {
+    protected void updateInputs() {
         RecurrentLayerType layerType = topology.getRecurrentLayerType();
         int outputCount = topology.getOutputCount();
         int inputCount = lastInputs.size();
@@ -42,7 +43,7 @@ public abstract class AbstractRecurrentLayer implements RecurrentLayer{
         }
     }
 
-    private void updateOutputs() {
+    protected void updateOutputs() {
         RecurrentLayerType layerType = topology.getRecurrentLayerType();
         int outputCount = topology.getOutputCount();
         if (layerType == RecurrentLayerType.NO_OUTPUT || layerType == RecurrentLayerType.NO_INPUT_NO_OUTPUT) {
