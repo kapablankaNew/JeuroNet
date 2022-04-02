@@ -33,9 +33,6 @@ import java.util.concurrent.ThreadLocalRandom;
 public class RnnLayer extends AbstractRecurrentLayer implements Serializable {
     public RnnLayer (@NonNull RnnLayerTopology topology) throws VectorMatrixException {
         super(topology);
-        if (topology.getOutputCount() > 1) {
-            throw new IllegalArgumentException("Output count in this version must be 1!");
-        }
         Whh = createWeightsMatrix(topology.getHiddenCount(), topology.getHiddenCount());
         Wxh = createWeightsMatrix(topology.getHiddenCount(), topology.getInputSize());
         Why = createWeightsMatrix(topology.getOutputSize(), topology.getHiddenCount());
@@ -46,13 +43,14 @@ public class RnnLayer extends AbstractRecurrentLayer implements Serializable {
     @Override
     public List<Vector> predict(List<Vector> inputSignals) throws VectorMatrixException {
         lastInputs = new ArrayList<>(inputSignals);
+        lastOutputs = new ArrayList<>();
         updateInputs();
         lastValuesH = new ArrayList<>();
         lastValuesZ = new ArrayList<>();
         Vector h = new Vector(topology.getHiddenCount(), VectorType.COLUMN);
         Vector z;
         ActivationFunction AF = topology.getActivationFunction();
-        for (Vector inputSignal : inputSignals) {
+        for (Vector inputSignal : lastInputs) {
             //Wxh * xi
             Vector first = Wxh.mul(inputSignal);
             //Whh * h(i-1)
