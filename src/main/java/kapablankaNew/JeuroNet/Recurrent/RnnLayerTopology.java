@@ -9,56 +9,24 @@ import lombok.Getter;
 
 import java.io.Serializable;
 
-@EqualsAndHashCode
-public class RnnLayerTopology implements RecurrentLayerTopology, Serializable {
+@EqualsAndHashCode(callSuper = true)
+public class RnnLayerTopology extends AbstractRecurrentLayerTopology implements Serializable {
     @Getter
-    private final int inputSize;
-
-    @Getter
-    private final int outputCount;
-
-    @Getter
-    private final int outputSize;
-
-    @Getter
-    private final int hiddenCount;
-
-    @Getter
-    private final double learningRate;
+    private final int hiddenSize;
 
     @Getter
     private final ActivationFunction activationFunction;
 
-    @Getter
-    private final RecurrentLayerType recurrentLayerType;
-
     @Builder
-    private RnnLayerTopology(int inputSize, int outputCount, int outputSize, int hiddenCount,
+    private RnnLayerTopology(int inputSize, int outputCount, int outputSize, int hiddenSize,
                              double learningRate, ActivationFunction activationFunction,
-                             RecurrentLayerType recurrentLayerType)
-            throws TopologyException {
-        if (outputCount <= 0) {
-            throw new TopologyException("Number of outputs must be greater than 0!");
-        }
-        if (inputSize <= 0) {
-            throw new TopologyException("Size of the input data must be greater than 0!");
-        }
-        if (outputSize <= 0) {
-            throw new TopologyException("Size of the output data must be greater than 0!");
-        }
-        if (hiddenCount <= 0) {
+                             RecurrentLayerType recurrentLayerType) throws TopologyException {
+        super(inputSize, outputCount, outputSize, learningRate, recurrentLayerType);
+        if (hiddenSize <= 0) {
             throw new TopologyException("Hidden count must be greater than 0!");
         }
-        if (learningRate <= 0.0) {
-            throw new TopologyException("Learning rate must be greater than 0!");
-        }
-        this.inputSize = inputSize;
-        this.outputCount = outputCount;
-        this.outputSize = outputSize;
-        this.hiddenCount = hiddenCount;
-        this.learningRate = learningRate;
+        this.hiddenSize = hiddenSize;
         this.activationFunction = activationFunction;
-        this.recurrentLayerType = recurrentLayerType;
     }
 
     @Override

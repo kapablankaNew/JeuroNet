@@ -1,21 +1,23 @@
 package kapablankaNew.JeuroNet.Recurrent;
 
+import kapablankaNew.JeuroNet.Mathematical.Matrix;
 import kapablankaNew.JeuroNet.Mathematical.Vector;
 import kapablankaNew.JeuroNet.Mathematical.VectorMatrixException;
 import lombok.Getter;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ThreadLocalRandom;
 
 public abstract class AbstractRecurrentLayer implements RecurrentLayer {
     @Getter
-    protected final RnnLayerTopology topology;
+    protected final RecurrentLayerTopology topology;
 
     protected List<Vector> lastInputs;
 
     protected List<Vector> lastOutputs;
 
-    protected AbstractRecurrentLayer(RnnLayerTopology topology) {
+    protected AbstractRecurrentLayer(RecurrentLayerTopology topology) {
         this.topology = topology;
         lastInputs = new ArrayList<>();
         lastOutputs = new ArrayList<>();
@@ -51,5 +53,17 @@ public abstract class AbstractRecurrentLayer implements RecurrentLayer {
                 lastOutputs.remove(0);
             }
         }
+    }
+
+    protected Matrix createWeightsMatrix(int rows, int columns) throws VectorMatrixException {
+        List<List<Double>> elements = new ArrayList<>();
+        for (int i = 0; i < rows; i++) {
+            List<Double> row = new ArrayList<>();
+            for (int j = 0; j < columns; j++) {
+                row.add(ThreadLocalRandom.current().nextDouble(0.0, 0.1));
+            }
+            elements.add(row);
+        }
+        return new Matrix(rows, columns, elements);
     }
 }

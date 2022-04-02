@@ -61,10 +61,10 @@ public class RnnNetwork implements Serializable {
             throw new IllegalArgumentException("Output count in this version must be 1!");
         }
         this.topology = topology;
-        Whh = createWeightsMatrix(topology.getHiddenCount(), topology.getHiddenCount());
-        Wxh = createWeightsMatrix(topology.getHiddenCount(), topology.getInputSize());
-        Why = createWeightsMatrix(topology.getOutputSize(), topology.getHiddenCount());
-        bh = new Vector(topology.getHiddenCount(), VectorType.COLUMN);
+        Whh = createWeightsMatrix(topology.getHiddenSize(), topology.getHiddenSize());
+        Wxh = createWeightsMatrix(topology.getHiddenSize(), topology.getInputSize());
+        Why = createWeightsMatrix(topology.getOutputSize(), topology.getHiddenSize());
+        bh = new Vector(topology.getHiddenSize(), VectorType.COLUMN);
         by = new Vector(topology.getOutputSize(), VectorType.COLUMN);
     }
 
@@ -93,7 +93,7 @@ public class RnnNetwork implements Serializable {
         lastValuesH = new ArrayList<>();
         lastValuesZ = new ArrayList<>();
         List<Vector> result = new ArrayList<>();
-        Vector h = new Vector(topology.getHiddenCount(), VectorType.COLUMN);
+        Vector h = new Vector(topology.getHiddenSize(), VectorType.COLUMN);
         Vector z;
         List<Vector> y = new ArrayList<>();
         ActivationFunction AF = topology.getActivationFunction();

@@ -1,7 +1,7 @@
 package kapablankaNew.JeuroNet.Recurrent;
 
 /*
-This class implements simple recurrent neural network, in first variant - only with link "many to many"
+This class implements simple recurrent neural network of the RNN type
     yo    y1    y2
     ^     ^     ^
     |     |     |
@@ -28,15 +28,16 @@ import lombok.NonNull;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.ThreadLocalRandom;
 
 public class RnnLayer extends AbstractRecurrentLayer implements Serializable {
     public RnnLayer (@NonNull RnnLayerTopology topology) throws VectorMatrixException {
         super(topology);
-        Whh = createWeightsMatrix(topology.getHiddenCount(), topology.getHiddenCount());
-        Wxh = createWeightsMatrix(topology.getHiddenCount(), topology.getInputSize());
-        Why = createWeightsMatrix(topology.getOutputSize(), topology.getHiddenCount());
-        bh = new Vector(topology.getHiddenCount(), VectorType.COLUMN);
+        activationFunction = topology.getActivationFunction();
+        hiddenCount = topology.getHiddenSize();
+        Whh = createWeightsMatrix(topology.getHiddenSize(), topology.getHiddenSize());
+        Wxh = createWeightsMatrix(topology.getHiddenSize(), topology.getInputSize());
+        Why = createWeightsMatrix(topology.getOutputSize(), topology.getHiddenSize());
+        bh = new Vector(topology.getHiddenSize(), VectorType.COLUMN);
         by = new Vector(topology.getOutputSize(), VectorType.COLUMN);
     }
 
@@ -47,9 +48,8 @@ public class RnnLayer extends AbstractRecurrentLayer implements Serializable {
         updateInputs();
         lastValuesH = new ArrayList<>();
         lastValuesZ = new ArrayList<>();
-        Vector h = new Vector(topology.getHiddenCount(), VectorType.COLUMN);
+        Vector h = new Vector(hiddenCount, VectorType.COLUMN);
         Vector z;
-        ActivationFunction AF = topology.getActivationFunction();
         for (Vector inputSignal : lastInputs) {
             //Wxh * xi
             Vector first = Wxh.mul(inputSignal);
@@ -58,7 +58,7 @@ public class RnnLayer extends AbstractRecurrentLayer implements Serializable {
             //Wxh * xi + Whh * h(i-1) + bh
             z = first.add(second).add(bh);
             //hi = AF(Wxh * xi + Whh * h(i-1) + bh)
-            h = AF.function(z);
+            h = activationFunction.function(z);
             //yi = Why * hi + by
             Vector yi = (Why.mul(h)).add(by);
             lastOutputs.add(yi);
@@ -73,7 +73,7 @@ public class RnnLayer extends AbstractRecurrentLayer implements Serializable {
     public List<Vector> learn(List<Vector> inputSignals, List<Vector> errorsGradients) throws VectorMatrixException {
         predict(inputSignals);
 
-        ActivationFunction AF = topology.getActivationFunction();
+        ActivationFunction AF = activationFunction;
         double learningRate = topology.getLearningRate();
         List<Vector> resultErrorsGradients = new ArrayList<>();
         for (int i = 0; i < inputSignals.size(); i++)
@@ -138,18 +138,6 @@ public class RnnLayer extends AbstractRecurrentLayer implements Serializable {
         return resultErrorsGradients;
     }
 
-    private static Matrix createWeightsMatrix(int rows, int columns) throws VectorMatrixException {
-        List<List<Double>> elements = new ArrayList<>();
-        for (int i = 0; i < rows; i++) {
-            List<Double> row = new ArrayList<>();
-            for (int j = 0; j < columns; j++) {
-                row.add(ThreadLocalRandom.current().nextDouble(0.0, 0.1));
-            }
-            elements.add(row);
-        }
-        return new Matrix(rows, columns, elements);
-    }
-
     private Matrix Wxh;
 
     private Matrix Whh;
@@ -160,10 +148,13 @@ public class RnnLayer extends AbstractRecurrentLayer implements Serializable {
 
     private Vector by;
 
-    //Next three fields storage data about last feed forward step.
+    //Next fields storage data about last feed forward step.
     //These data use in the learning process
     private List<Vector> lastValuesH;
 
     private List<Vector> lastValuesZ;
 
+    private final ActivationFunction activationFunction;
+
+    private final int hiddenCount;
 }
