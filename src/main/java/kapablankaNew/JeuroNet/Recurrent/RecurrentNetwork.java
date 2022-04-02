@@ -10,19 +10,19 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class RecurrentNetwork {
-    private final List<RnnLayer> layers;
+    private final List<RecurrentLayer> layers;
 
     @Getter
     private final LossFunction lossFunction;
 
     private List<List<Vector>> lastLayersInputs;
 
-    public RecurrentNetwork(List<RnnLayerTopology> topologies, LossFunction lossFunction)
+    public RecurrentNetwork(List<RecurrentLayerTopology> topologies, LossFunction lossFunction)
             throws VectorMatrixException {
         this.lossFunction = lossFunction;
         layers = new ArrayList<>();
         for (var topology: topologies) {
-            RnnLayer layer = new RnnLayer(topology);
+            RecurrentLayer layer = topology.createRecurrentLayer();
             layers.add(layer);
         }
     }

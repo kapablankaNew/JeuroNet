@@ -19,6 +19,7 @@ AF is activation function, in recurrent networks it's usually tanh.
  */
 
 import kapablankaNew.JeuroNet.Mathematical.ActivationFunction;
+import kapablankaNew.JeuroNet.Mathematical.LossFunction;
 import kapablankaNew.JeuroNet.Mathematical.Matrix;
 import kapablankaNew.JeuroNet.Mathematical.Vector;
 import kapablankaNew.JeuroNet.Mathematical.VectorMatrixException;
@@ -128,7 +129,8 @@ public class RnnNetwork implements Serializable {
                 ActivationFunction AF = topology.getActivationFunction();
 
                 //first - calculate loss function
-                Vector d_y = topology.getLossFunction().gradient(result.get(0), expectedOutputs.get(0));
+                // topology.getLossFunction()
+                Vector d_y = LossFunction.MAE.gradient(result.get(0), expectedOutputs.get(0));
 
                 //calculate values dE/dby and dE/dWhy
                 Matrix d_Why = d_y.mul(lastValuesH.get(lastValuesH.size() - 1).T());

@@ -1,7 +1,7 @@
 package kapablankaNew.JeuroNet.Recurrent;
 
 import kapablankaNew.JeuroNet.Mathematical.ActivationFunction;
-import kapablankaNew.JeuroNet.Mathematical.LossFunction;
+import kapablankaNew.JeuroNet.Mathematical.VectorMatrixException;
 import kapablankaNew.JeuroNet.TopologyException;
 import lombok.Builder;
 import lombok.EqualsAndHashCode;
@@ -10,7 +10,7 @@ import lombok.Getter;
 import java.io.Serializable;
 
 @EqualsAndHashCode
-public class RnnLayerTopology implements Serializable {
+public class RnnLayerTopology implements RecurrentLayerTopology, Serializable {
     @Getter
     private final int inputSize;
 
@@ -30,15 +30,12 @@ public class RnnLayerTopology implements Serializable {
     private final ActivationFunction activationFunction;
 
     @Getter
-    private final LossFunction lossFunction;
-
-    @Getter
     private final RecurrentLayerType recurrentLayerType;
 
     @Builder
     private RnnLayerTopology(int inputSize, int outputCount, int outputSize, int hiddenCount,
-                            double learningRate, ActivationFunction activationFunction,
-                            LossFunction lossFunction, RecurrentLayerType recurrentLayerType)
+                             double learningRate, ActivationFunction activationFunction,
+                             RecurrentLayerType recurrentLayerType)
             throws TopologyException {
         if (outputCount <= 0) {
             throw new TopologyException("Number of outputs must be greater than 0!");
@@ -60,8 +57,12 @@ public class RnnLayerTopology implements Serializable {
         this.outputSize = outputSize;
         this.hiddenCount = hiddenCount;
         this.learningRate = learningRate;
-        this.lossFunction = lossFunction;
         this.activationFunction = activationFunction;
         this.recurrentLayerType = recurrentLayerType;
+    }
+
+    @Override
+    public RecurrentLayer createRecurrentLayer() throws VectorMatrixException {
+        return new RnnLayer(this);
     }
 }

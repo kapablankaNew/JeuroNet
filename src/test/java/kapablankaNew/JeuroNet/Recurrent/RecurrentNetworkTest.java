@@ -39,14 +39,13 @@ public class RecurrentNetworkTest {
                 .hiddenCount(100)
                 .learningRate(0.01)
                 .activationFunction(ActivationFunction.TANH)
-                .lossFunction(LossFunction.MAE)
                 .recurrentLayerType(RecurrentLayerType.NO_OUTPUT)
                 .build();
 
-        List<RnnLayerTopology> topologies = List.of(topology);
+        List<RecurrentLayerTopology> topologies = List.of(topology);
         RecurrentNetwork recurrentNetwork = new RecurrentNetwork(topologies, LossFunction.MAE);
         recurrentNetwork.learn(train, 50);
-        double loss = calcLoss(recurrentNetwork, train);
+        double loss = calcLoss(recurrentNetwork, test);
 
         Assert.assertTrue(loss < 0.5);
     }
