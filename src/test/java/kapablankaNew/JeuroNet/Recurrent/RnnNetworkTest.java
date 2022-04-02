@@ -4,31 +4,21 @@ import com.github.cliftonlabs.json_simple.JsonException;
 import com.github.cliftonlabs.json_simple.JsonObject;
 import com.github.cliftonlabs.json_simple.Jsoner;
 import kapablankaNew.JeuroNet.DataSetException;
-import kapablankaNew.JeuroNet.Mathematical.ActivationFunction;
-import kapablankaNew.JeuroNet.Mathematical.LossFunction;
+import kapablankaNew.JeuroNet.Mathematical.*;
 import kapablankaNew.JeuroNet.Mathematical.Vector;
-import kapablankaNew.JeuroNet.Mathematical.VectorMatrixException;
-import kapablankaNew.JeuroNet.Mathematical.VectorType;
 import kapablankaNew.JeuroNet.TextConverter;
 import kapablankaNew.JeuroNet.TopologyException;
 import org.junit.Assert;
 import org.junit.Test;
 
-import java.io.BufferedReader;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.Reader;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Set;
+import java.io.*;
+import java.util.*;
 
-public class RecurrentNetworkTest {
+public class RnnNetworkTest {
     private TextConverter converter;
     @Test
-    public void learnTest() throws JsonException, DataSetException, IOException,
-            VectorMatrixException, TopologyException {
+    public void predictTest() throws IOException, JsonException, TopologyException,
+            VectorMatrixException, DataSetException {
         converter = null;
         RecurrentDataset train = getDatasetFromFile("src/test/resources/Train.json");
         RecurrentDataset test = getDatasetFromFile("src/test/resources/Test.json");
@@ -37,18 +27,40 @@ public class RecurrentNetworkTest {
                 .outputCount(1)
                 .outputSize(2)
                 .hiddenCount(100)
-                .learningRate(0.01)
+                .learningRate(0.0001)
                 .activationFunction(ActivationFunction.TANH)
                 .lossFunction(LossFunction.MAE)
                 .recurrentLayerType(RecurrentLayerType.NO_OUTPUT)
                 .build();
 
-        List<RnnLayerTopology> topologies = List.of(topology);
-        RecurrentNetwork recurrentNetwork = new RecurrentNetwork(topologies, LossFunction.MAE);
-        recurrentNetwork.learn(train, 50);
-        double loss = calcLoss(recurrentNetwork, train);
+        RnnNetwork network = new RnnNetwork(topology);
+        network.learn(train, 50);
 
+        double loss = calcLoss(network, test);
         Assert.assertTrue(loss < 0.5);
+    }
+
+    @Test
+    public void saveLoadTest() throws VectorMatrixException, TopologyException, DataSetException, IOException, ClassNotFoundException {
+        RnnLayerTopology topology = RnnLayerTopology.builder()
+                .inputSize(3)
+                .outputCount(1)
+                .outputSize(2)
+                .hiddenCount(5)
+                .learningRate(0.01).activationFunction(ActivationFunction.TANH)
+                .lossFunction(LossFunction.MSE)
+                .recurrentLayerType(RecurrentLayerType.NO_INPUT_NO_OUTPUT)
+                .build();
+
+        RecurrentDataset dataSet = new RecurrentDataset(3, 1, 2);
+        Vector input = new Vector(Arrays.asList(1.0, 2.0, 3.0), VectorType.COLUMN);
+        Vector output = new Vector(Arrays.asList(0.0, 1.0), VectorType.COLUMN);
+        dataSet.addData(Arrays.asList(input, input, input), List.of(output));
+        RnnNetwork NN = new RnnNetwork(topology);
+        NN.learn(dataSet, 2);
+        NN.save("TestRNN.jnn");
+        RnnNetwork NnLoaded = RnnNetwork.load("TestRNN.jnn");
+        Assert.assertEquals(NN, NnLoaded);
     }
 
     public RecurrentDataset getDatasetFromFile(String filename) throws DataSetException, IOException,
@@ -77,17 +89,15 @@ public class RecurrentNetworkTest {
         return result;
     }
 
-    public double calcLoss(RecurrentNetwork network, RecurrentDataset dataset) throws VectorMatrixException {
+    public static double calcLoss(RnnNetwork network, RecurrentDataset dataset) throws VectorMatrixException {
+        RnnLayerTopology topology = network.getTopology();
         double loss = 0.0;
         for (int j = 0; j < dataset.getSize(); j++) {
             List<Vector> ins = dataset.getInputSignals(j);
             List<Vector> expOut = dataset.getExpectedOutputs(j);
-            List<Vector> result = network.predict(ins);
-            for (int i = 0; i < result.size(); i++) {
-                Vector res = result.get(i);
-                Vector exp = expOut.get(i);
-                loss += network.getLossFunction().loss(res, exp);
-            }
+            Vector res = network.predict(ins).get(0);
+            Vector exp = expOut.get(0);
+            loss += topology.getLossFunction().loss(res, exp);
         }
         loss /= dataset.getSize();
 

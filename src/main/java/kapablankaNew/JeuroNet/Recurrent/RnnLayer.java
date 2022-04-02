@@ -29,7 +29,6 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
-import java.util.stream.Collectors;
 
 public class RnnLayer extends AbstractRecurrentLayer implements Serializable {
     public RnnLayer (@NonNull RnnLayerTopology topology) throws VectorMatrixException {
@@ -112,7 +111,7 @@ public class RnnLayer extends AbstractRecurrentLayer implements Serializable {
 
                 //update dE/dxi
                 if(k < inputSignals.size()) {
-                    Vector d_x = temp.mul(Wxh.T());
+                    Vector d_x = (temp.T().mul(Wxh)).T();
                     resultErrorsGradients.set(k, resultErrorsGradients.get(k).add(d_x));
                 }
 

@@ -1,11 +1,11 @@
 package kapablankaNew.JeuroNet.Mathematical;
 
 public class VectorMatrixException extends Exception{
-    VectorMatrixException() {
+    public VectorMatrixException() {
         super();
     }
 
-    VectorMatrixException(String message) {
+    public VectorMatrixException(String message) {
         super(message);
     }
 }
