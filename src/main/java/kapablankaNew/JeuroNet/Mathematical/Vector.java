@@ -52,6 +52,14 @@ public class Vector implements Serializable {
         this.type = type;
     }
 
+    public static Vector getVectorWithElementsOfOne(int size, VectorType type) {
+        List<Double> elements = new ArrayList<>();
+        for (int i = 0; i < size; i++) {
+            elements.add(1.0);
+        }
+        return new Vector(elements, type);
+    }
+
     public int size() {
         return elements.size();
     }

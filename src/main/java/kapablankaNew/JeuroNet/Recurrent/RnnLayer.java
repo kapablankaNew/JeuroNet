@@ -33,7 +33,7 @@ public class RnnLayer extends AbstractRecurrentLayer implements Serializable {
     public RnnLayer (@NonNull RnnLayerTopology topology) throws VectorMatrixException {
         super(topology);
         activationFunction = topology.getActivationFunction();
-        hiddenCount = topology.getHiddenSize();
+        hiddenSize = topology.getHiddenSize();
         Whh = createWeightsMatrix(topology.getHiddenSize(), topology.getHiddenSize());
         Wxh = createWeightsMatrix(topology.getHiddenSize(), topology.getInputSize());
         Why = createWeightsMatrix(topology.getOutputSize(), topology.getHiddenSize());
@@ -48,7 +48,7 @@ public class RnnLayer extends AbstractRecurrentLayer implements Serializable {
         updateInputs();
         lastValuesH = new ArrayList<>();
         lastValuesZ = new ArrayList<>();
-        Vector h = new Vector(hiddenCount, VectorType.COLUMN);
+        Vector h = new Vector(hiddenSize, VectorType.COLUMN);
         Vector z;
         for (Vector inputSignal : lastInputs) {
             //Wxh * xi
@@ -156,5 +156,5 @@ public class RnnLayer extends AbstractRecurrentLayer implements Serializable {
 
     private final ActivationFunction activationFunction;
 
-    private final int hiddenCount;
+    private final int hiddenSize;
 }
