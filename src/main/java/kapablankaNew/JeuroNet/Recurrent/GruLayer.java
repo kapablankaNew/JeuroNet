@@ -14,14 +14,16 @@ import java.util.List;
 public class GruLayer extends AbstractRecurrentLayer implements Serializable {
     protected GruLayer(@NonNull GruLayerTopology topology) throws VectorMatrixException {
         super(topology);
-        Wxz = createWeightsMatrix(topology.getOutputSize(), topology.getInputSize());
-        Whz = createWeightsMatrix(topology.getOutputSize(), topology.getOutputSize());
-        Wxr = createWeightsMatrix(topology.getOutputSize(), topology.getInputSize());
-        Whr = createWeightsMatrix(topology.getOutputSize(), topology.getOutputSize());
-        Wxo = createWeightsMatrix(topology.getOutputSize(), topology.getInputSize());
-        Who = createWeightsMatrix(topology.getOutputSize(), topology.getOutputSize());
-        bz = new Vector(topology.getOutputSize(), VectorType.COLUMN);
-        br = new Vector(topology.getOutputSize(), VectorType.COLUMN);
+        Wxz = createWeightsMatrix(topology.getHiddenSize(), topology.getInputSize());
+        Whz = createWeightsMatrix(topology.getHiddenSize(), topology.getHiddenSize());
+        Wxr = createWeightsMatrix(topology.getHiddenSize(), topology.getHiddenSize());
+        Whr = createWeightsMatrix(topology.getHiddenSize(), topology.getHiddenSize());
+        Wxo = createWeightsMatrix(topology.getHiddenSize(), topology.getInputSize());
+        Who = createWeightsMatrix(topology.getHiddenSize(), topology.getHiddenSize());
+        Why = createWeightsMatrix(topology.getOutputSize(), topology.getHiddenSize());
+        bz = new Vector(topology.getHiddenSize(), VectorType.COLUMN);
+        br = new Vector(topology.getHiddenSize(), VectorType.COLUMN);
+        by = new Vector(topology.getOutputSize(), VectorType.COLUMN);
     }
 
     @Override
@@ -71,7 +73,7 @@ public class GruLayer extends AbstractRecurrentLayer implements Serializable {
             // hi = (1 - z) ◎ h(i-1) + z ◎ o
             h = first.add(second);
 
-            y = new Vector(h);
+            y = (Why.mul(h)).add(by);
 
             lastOutputs.add(y);
             lastValuesZZ.add(zz);
@@ -88,7 +90,89 @@ public class GruLayer extends AbstractRecurrentLayer implements Serializable {
 
     @Override
     public List<Vector> learn(List<Vector> inputSignals, List<Vector> errorsGradients) throws VectorMatrixException {
-        return null;
+        predict(inputSignals);
+        double learningRate = topology.getLearningRate();
+        List<Vector> resultErrorsGradients = new ArrayList<>();
+        for (int i = 0; i < inputSignals.size(); i++)
+        {
+            resultErrorsGradients.add(new Vector(topology.getInputSize()));
+        }
+        //create matrices for gradients
+        Matrix d_Why = new Matrix(Why.getRows(), Why.getColumns());
+        Matrix d_Who = new Matrix(Who.getRows(), Who.getColumns());
+        Matrix d_Wxo = new Matrix(Wxo.getRows(), Wxo.getColumns());
+        Matrix d_Whr = new Matrix(Whr.getRows(), Whr.getColumns());
+        Matrix d_Wxr = new Matrix(Wxr.getRows(), Wxr.getColumns());
+        Matrix d_Whz = new Matrix(Whz.getRows(), Whz.getColumns());
+        Matrix d_Wxz = new Matrix(Wxz.getRows(), Wxz.getColumns());
+        Vector d_bz = new Vector(bz.size(), bz.getType());
+        Vector d_br = new Vector(br.size(), br.getType());
+        Vector d_by = new Vector(by.size(), by.getType());
+
+        for (int i = 0; i < errorsGradients.size(); i++) {
+            //first - get loss function gradient
+            Vector d_y = new Vector(errorsGradients.get(errorsGradients.size() - 1 - i));
+
+            //calculate values dE/dby and dE/dWhy
+            d_Why = d_Why.add(d_y.mul(lastValuesH.get(lastValuesH.size() - 1 - i).T()));
+            d_by = d_by.add(d_y);
+
+            ////it is special value: dE/dzi
+            //Vector temp = Why.T().mul(d_y).mulElemByElem(AF.derivative(lastValuesZ.get(lastValuesZ.size() - 1)));
+//
+            //for (int k = inputSignals.size() - 1 - i; k >= 0; k--) {
+            //    Vector h_k = lastValuesH.get(k);
+            //    Vector z_k = lastValuesZ.get(k);
+//
+            //    //update gradient values
+            //    d_Whh = d_Whh.add(temp.mul(h_k.T()));
+            //    d_Wxh = d_Wxh.add(temp.mul(lastInputs.get(k).T()));
+            //    d_bh = d_bh.add(temp);
+//
+            //    //update dE/dxi
+            //    if(k < inputSignals.size()) {
+            //        Vector d_x = (temp.T().mul(Wxh)).T();
+            //        resultErrorsGradients.set(k, resultErrorsGradients.get(k).add(d_x));
+            //    }
+//
+            //    //dE/dzi = Whh.T * dE/dz(i+1) * dh(i+1)/dzi
+            //    temp = Whh.T().mul(temp.mulElemByElem(AF.derivative(z_k)));
+            //}
+        }
+        //limit the values in gradients to avoid the problem of vanishing gradients
+        d_Why = d_Why.limit(-1.0, 1.0);
+        d_by = d_by.limit(-1.0, 1.0);
+
+        d_Who = d_Who.limit(-1.0, 1.0);
+        d_Wxo = d_Wxo.limit(-1.0, 1.0);
+
+        d_Whr = d_Whr.limit(-1.0, 1.0);
+        d_Wxr = d_Wxr.limit(-1.0, 1.0);
+        d_br = d_br.limit(-1.0, 1.0);
+
+        d_Whz = d_Whz.limit(-1.0, 1.0);
+        d_Wxz = d_Wxz.limit(-1.0, 1.0);
+        d_bz = d_bz.limit(-1.0, 1.0);
+
+        for (int i = 0; i < resultErrorsGradients.size(); i++) {
+            resultErrorsGradients.set(i, resultErrorsGradients.get(i).limit(-1.0, 1.0));
+        }
+        //update parameters of RNN
+        Why = Why.sub(d_Why.mul(learningRate));
+        by = by.sub(d_by.mul(learningRate));
+
+        Who = Who.sub(d_Who.mul(learningRate));
+        Wxo = Wxo.sub(d_Wxo.mul(learningRate));
+
+        Whr = Whr.sub(d_Whr.mul(learningRate));
+        Wxr = Wxr.sub(d_Wxr.mul(learningRate));
+        br = br.sub(d_br.mul(learningRate));
+
+        Whz = Whz.sub(d_Whz.mul(learningRate));
+        Wxz = Wxz.sub(d_Wxz.mul(learningRate));
+        bz = bz.sub(d_bz.mul(learningRate));
+
+        return resultErrorsGradients;
     }
 
     private void clearCacheValues() {
@@ -106,9 +190,9 @@ public class GruLayer extends AbstractRecurrentLayer implements Serializable {
 
     private final ActivationFunction tanh = ActivationFunction.TANH;
 
-    private Matrix Wxz, Whz, Wxr, Whr, Wxo, Who;
+    private Matrix Wxz, Whz, Wxr, Whr, Wxo, Who, Why;
 
-    private Vector bz, br;
+    private Vector bz, br, by;
 
     //Next fields storage data about last feed forward step.
     //These data use in the learning process

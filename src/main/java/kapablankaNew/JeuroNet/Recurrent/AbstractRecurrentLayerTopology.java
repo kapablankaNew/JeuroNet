@@ -20,7 +20,6 @@ public abstract class AbstractRecurrentLayerTopology implements RecurrentLayerTo
     @Getter
     private final RecurrentLayerType recurrentLayerType;
 
-    @Builder
     protected AbstractRecurrentLayerTopology(int inputSize, int outputCount, int outputSize, double learningRate,
                                            RecurrentLayerType recurrentLayerType) throws TopologyException {
         if (outputCount <= 0) {

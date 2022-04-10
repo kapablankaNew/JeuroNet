@@ -92,8 +92,8 @@ public class RnnLayer extends AbstractRecurrentLayer implements Serializable {
             Vector d_y = new Vector(errorsGradients.get(errorsGradients.size() - 1 - i));
 
             //calculate values dE/dby and dE/dWhy
-            d_Why.add(d_y.mul(lastValuesH.get(lastValuesH.size() - 1 - i).T()));
-            d_by.add(d_y);
+            d_Why = d_Why.add(d_y.mul(lastValuesH.get(lastValuesH.size() - 1 - i).T()));
+            d_by = d_by.add(d_y);
 
             //it is special value: dE/dzi
             Vector temp = Why.T().mul(d_y).mulElemByElem(AF.derivative(lastValuesZ.get(lastValuesZ.size() - 1)));

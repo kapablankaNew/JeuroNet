@@ -37,7 +37,7 @@ public class RecurrentNetworkTest {
                 .outputCount(1)
                 .outputSize(2)
                 .hiddenSize(100)
-                .learningRate(0.01)
+                .learningRate(0.0001)
                 .activationFunction(ActivationFunction.TANH)
                 .recurrentLayerType(RecurrentLayerType.NO_OUTPUT)
                 .build();
