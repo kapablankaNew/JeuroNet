@@ -14,15 +14,17 @@ import java.util.List;
 public class GruLayer extends AbstractRecurrentLayer implements Serializable {
     protected GruLayer(@NonNull GruLayerTopology topology) throws VectorMatrixException {
         super(topology);
+        hiddenSize = topology.getHiddenSize();
         Wxz = createWeightsMatrix(topology.getHiddenSize(), topology.getInputSize());
         Whz = createWeightsMatrix(topology.getHiddenSize(), topology.getHiddenSize());
-        Wxr = createWeightsMatrix(topology.getHiddenSize(), topology.getHiddenSize());
+        Wxr = createWeightsMatrix(topology.getHiddenSize(), topology.getInputSize());
         Whr = createWeightsMatrix(topology.getHiddenSize(), topology.getHiddenSize());
         Wxo = createWeightsMatrix(topology.getHiddenSize(), topology.getInputSize());
         Who = createWeightsMatrix(topology.getHiddenSize(), topology.getHiddenSize());
         Why = createWeightsMatrix(topology.getOutputSize(), topology.getHiddenSize());
         bz = new Vector(topology.getHiddenSize(), VectorType.COLUMN);
         br = new Vector(topology.getHiddenSize(), VectorType.COLUMN);
+        bo = new Vector(topology.getHiddenSize(), VectorType.COLUMN);
         by = new Vector(topology.getOutputSize(), VectorType.COLUMN);
     }
 
@@ -32,7 +34,7 @@ public class GruLayer extends AbstractRecurrentLayer implements Serializable {
         lastInputs = new ArrayList<>(inputSignals);
         lastOutputs = new ArrayList<>();
         updateInputs();
-        Vector h = new Vector(topology.getOutputSize(), VectorType.COLUMN);
+        Vector h = new Vector(hiddenSize, VectorType.COLUMN);
         Vector z, r, o, zz, rr, oo, y;
         // Additional values
         Vector first, second;
@@ -59,12 +61,12 @@ public class GruLayer extends AbstractRecurrentLayer implements Serializable {
             first = Wxo.mul(inputSignal);
             // Who * (r ◎ h(i-1))
             second = Who.mul(r.mulElemByElem(h));
-            // Wxo * xi + Who * (r ◎ h(i-1))
-            oo = first.add(second);
+            // Wxo * xi + Who * (r ◎ h(i-1)) + bo
+            oo = first.add(second).add(bo);
             // o = tanh(Wxo * xi + Who * (r ◎ h(i-1)))
             o = tanh.function(oo);
 
-            Vector one = Vector.getVectorWithElementsOfOne(topology.getOutputSize(), VectorType.COLUMN);
+            Vector one = Vector.getVectorWithElementsOfOne(hiddenSize, VectorType.COLUMN);
 
             // (1 - z) ◎ h(i-1)
             first = (one.sub(z)).mulElemByElem(h);
@@ -107,37 +109,78 @@ public class GruLayer extends AbstractRecurrentLayer implements Serializable {
         Matrix d_Wxz = new Matrix(Wxz.getRows(), Wxz.getColumns());
         Vector d_bz = new Vector(bz.size(), bz.getType());
         Vector d_br = new Vector(br.size(), br.getType());
+        Vector d_bo = new Vector(bo.size(), bo.getType());
         Vector d_by = new Vector(by.size(), by.getType());
 
         for (int i = 0; i < errorsGradients.size(); i++) {
             //first - get loss function gradient
-            Vector d_y = new Vector(errorsGradients.get(errorsGradients.size() - 1 - i));
+            Vector dL_dy = new Vector(errorsGradients.get(errorsGradients.size() - 1 - i));
 
             //calculate values dE/dby and dE/dWhy
-            d_Why = d_Why.add(d_y.mul(lastValuesH.get(lastValuesH.size() - 1 - i).T()));
-            d_by = d_by.add(d_y);
+            d_Why = d_Why.add(dL_dy.mul(lastValuesH.get(lastValuesH.size() - 1 - i).T()));
+            d_by = d_by.add(dL_dy);
 
-            ////it is special value: dE/dzi
-            //Vector temp = Why.T().mul(d_y).mulElemByElem(AF.derivative(lastValuesZ.get(lastValuesZ.size() - 1)));
-//
-            //for (int k = inputSignals.size() - 1 - i; k >= 0; k--) {
-            //    Vector h_k = lastValuesH.get(k);
-            //    Vector z_k = lastValuesZ.get(k);
-//
-            //    //update gradient values
-            //    d_Whh = d_Whh.add(temp.mul(h_k.T()));
-            //    d_Wxh = d_Wxh.add(temp.mul(lastInputs.get(k).T()));
-            //    d_bh = d_bh.add(temp);
-//
-            //    //update dE/dxi
-            //    if(k < inputSignals.size()) {
-            //        Vector d_x = (temp.T().mul(Wxh)).T();
-            //        resultErrorsGradients.set(k, resultErrorsGradients.get(k).add(d_x));
-            //    }
-//
-            //    //dE/dzi = Whh.T * dE/dz(i+1) * dh(i+1)/dzi
-            //    temp = Whh.T().mul(temp.mulElemByElem(AF.derivative(z_k)));
-            //}
+            //it is special value: dE/dzi
+            Vector dL_dh = Why.T().mul(dL_dy);
+
+            for (int k = inputSignals.size() - 1 - i; k >= 0; k--) {
+                Vector x = inputSignals.get(k);
+                Vector o = lastValuesO.get(k);
+                Vector z = lastValuesZ.get(k);
+                Vector r = lastValuesR.get(k);
+                Vector h_prev = lastValuesH.get(k);
+                Vector zz = lastValuesZZ.get(k);
+                Vector rr = lastValuesRR.get(k);
+                Vector oo = lastValuesOO.get(k);
+
+                Vector dL_dz = o.sub(h_prev).mulElemByElem(dL_dh);
+                Vector dL_dzz = dL_dz.mulElemByElem(sigma.derivative(zz));
+
+                Vector dL_do = z.mulElemByElem(dL_dh);
+                Vector dL_doo = dL_do.mulElemByElem(tanh.derivative(oo));
+
+                Vector dL_dr = Who.T().mul(dL_doo.mulElemByElem(h_prev));
+                Vector dL_drr = sigma.derivative(rr).mulElemByElem(dL_dr);
+
+                Matrix dL_dWxo = dL_doo.mul(x.T());
+                Matrix dL_dWho = dL_doo.mul((r.mulElemByElem(h_prev)).T());
+                Vector dL_dbo = new Vector(dL_doo);
+
+                Matrix dL_dWxr = dL_drr.mul(x.T());
+                Matrix dL_dWhr = dL_drr.mul(h_prev.T());
+                Vector dL_dbr = new Vector(dL_drr);
+
+                Matrix dL_dWxz = dL_dzz.mul(x.T());
+                Matrix dL_dWhz = dL_dzz.mul(h_prev.T());
+                Vector dL_dbz = new Vector(dL_dzz);
+
+                d_Who = d_Who.add(dL_dWho);
+                d_Wxo = d_Wxo.add(dL_dWxo);
+                d_Whr = d_Whr.add(dL_dWhr);
+                d_Wxr = d_Wxr.add(dL_dWxr);
+                d_Whz = d_Whz.add(dL_dWhz);
+                d_Wxz = d_Wxz.add(dL_dWxz);
+                d_bz = d_bz.add(dL_dbz);
+                d_br = d_br.add(dL_dbr);
+                d_bo = d_bo.add(dL_dbo);
+
+                // Update dL/dx
+                if (k < inputSignals.size()) {
+                    Vector first = Wxo.T().mul(dL_doo);
+                    Vector second = Wxz.T().mul(dL_dzz);
+                    Vector third = Wxr.T().mul(dL_drr);
+                    Vector dL_dx = first.add(second).add(third);
+                    resultErrorsGradients.set(k, resultErrorsGradients.get(k).add(dL_dx));
+                }
+
+                // Update dL/dh
+                Vector first = Vector.getVectorWithElementsOfOne(h_prev.size(), h_prev.getType());
+                first = first.sub(z).mulElemByElem(dL_dh);
+                Vector second = Whr.T().mul(dL_drr);
+                Vector third = Who.T().mul(dL_doo.mulElemByElem(r));
+                Vector fourth = Whz.T().mul(dL_dzz);
+                dL_dh = first.add(second).add(third).add(fourth);
+            }
         }
         //limit the values in gradients to avoid the problem of vanishing gradients
         d_Why = d_Why.limit(-1.0, 1.0);
@@ -145,6 +188,7 @@ public class GruLayer extends AbstractRecurrentLayer implements Serializable {
 
         d_Who = d_Who.limit(-1.0, 1.0);
         d_Wxo = d_Wxo.limit(-1.0, 1.0);
+        d_bo = d_bo.limit(-1.0, 1.0);
 
         d_Whr = d_Whr.limit(-1.0, 1.0);
         d_Wxr = d_Wxr.limit(-1.0, 1.0);
@@ -163,6 +207,7 @@ public class GruLayer extends AbstractRecurrentLayer implements Serializable {
 
         Who = Who.sub(d_Who.mul(learningRate));
         Wxo = Wxo.sub(d_Wxo.mul(learningRate));
+        bo = bo.sub(d_bo.mul(learningRate));
 
         Whr = Whr.sub(d_Whr.mul(learningRate));
         Wxr = Wxr.sub(d_Wxr.mul(learningRate));
@@ -192,11 +237,13 @@ public class GruLayer extends AbstractRecurrentLayer implements Serializable {
 
     private Matrix Wxz, Whz, Wxr, Whr, Wxo, Who, Why;
 
-    private Vector bz, br, by;
+    private Vector bz, br, bo, by;
 
     //Next fields storage data about last feed forward step.
     //These data use in the learning process
     private List<Vector> lastValuesH, lastValuesZ, lastValuesR, lastValuesO;
 
     private List<Vector> lastValuesZZ, lastValuesRR, lastValuesOO;
+
+    private final int hiddenSize;
 }

@@ -11,8 +11,8 @@ import kapablankaNew.JeuroNet.Mathematical.VectorMatrixException;
 import kapablankaNew.JeuroNet.Mathematical.VectorType;
 import kapablankaNew.JeuroNet.TextConverter;
 import kapablankaNew.JeuroNet.TopologyException;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
 
 import java.io.BufferedReader;
 import java.io.FileInputStream;
@@ -24,14 +24,21 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
 
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
 public class RecurrentNetworkTest {
-    private TextConverter converter;
+    private static TextConverter converter;
+    private static RecurrentDataset train;
+    private static RecurrentDataset test;
+
+    @BeforeAll
+    static void setup() throws JsonException, DataSetException, IOException {
+        train = getDatasetFromFile("src/test/resources/Train.json");
+        test = getDatasetFromFile("src/test/resources/Test.json");
+    }
+
     @Test
-    public void learnTest() throws JsonException, DataSetException, IOException,
-            VectorMatrixException, TopologyException {
-        converter = null;
-        RecurrentDataset train = getDatasetFromFile("src/test/resources/Train.json");
-        RecurrentDataset test = getDatasetFromFile("src/test/resources/Test.json");
+    public void learnRnnTest() throws VectorMatrixException, TopologyException {
         RnnLayerTopology topology = RnnLayerTopology.builder()
                 .inputSize(converter.getNumberUniqueWords())
                 .outputCount(1)
@@ -47,10 +54,38 @@ public class RecurrentNetworkTest {
         recurrentNetwork.learn(train, 50);
         double loss = calcLoss(recurrentNetwork, test);
 
-        Assert.assertTrue(loss < 0.5);
+        assertTrue(loss < 0.5);
     }
 
-    public RecurrentDataset getDatasetFromFile(String filename) throws DataSetException, IOException,
+    @Test
+    public void learnGruTest() throws VectorMatrixException, TopologyException {
+        GruLayerTopology topology = GruLayerTopology.builder()
+                .inputSize(converter.getNumberUniqueWords())
+                .outputCount(20)
+                .outputSize(25)
+                .hiddenSize(20)
+                .learningRate(0.001)
+                .recurrentLayerType(RecurrentLayerType.NO_OUTPUT)
+                .build();
+
+        GruLayerTopology topology1 = GruLayerTopology.builder()
+                .inputSize(25)
+                .outputCount(1)
+                .outputSize(2)
+                .hiddenSize(20)
+                .learningRate(0.001)
+                .recurrentLayerType(RecurrentLayerType.NO_OUTPUT)
+                .build();
+
+        List<RecurrentLayerTopology> topologies = List.of(topology, topology1);
+        RecurrentNetwork recurrentNetwork = new RecurrentNetwork(topologies, LossFunction.MAE);
+        recurrentNetwork.learn(train, 150);
+        double loss = calcLoss(recurrentNetwork, test);
+
+        assertTrue(loss < 0.49);
+    }
+
+    public static RecurrentDataset getDatasetFromFile(String filename) throws DataSetException, IOException,
             JsonException {
         RecurrentDataset result;
         try (Reader JsonReader = new BufferedReader(new InputStreamReader(new FileInputStream(filename)))) {
