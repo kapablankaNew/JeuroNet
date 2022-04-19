@@ -85,6 +85,23 @@ public class RecurrentNetworkTest {
         assertTrue(loss < 0.49);
     }
 
+    @Test
+    public void learnLstmTest() throws VectorMatrixException, TopologyException {
+        LstmLayerTopology topology = LstmLayerTopology.builder()
+                .inputSize(converter.getNumberUniqueWords())
+                .outputCount(20)
+                .outputSize(25)
+                .hiddenSize(20)
+                .learningRate(0.001)
+                .recurrentLayerType(RecurrentLayerType.NO_OUTPUT)
+                .build();
+        List<RecurrentLayerTopology> topologies = List.of(topology);
+        RecurrentNetwork recurrentNetwork = new RecurrentNetwork(topologies, LossFunction.MAE);
+        for (int i = 0; i < train.getSize(); i++) {
+            recurrentNetwork.predict(train.getInputSignals(i));
+        }
+    }
+
     public static RecurrentDataset getDatasetFromFile(String filename) throws DataSetException, IOException,
             JsonException {
         RecurrentDataset result;
