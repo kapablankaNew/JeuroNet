@@ -81,7 +81,7 @@ public class RecurrentNetworkTest {
         RecurrentNetwork recurrentNetwork = new RecurrentNetwork(topologies, LossFunction.MAE);
         recurrentNetwork.learn(train, 150);
         double loss = calcLoss(recurrentNetwork, test);
-
+        System.out.println(loss);
         assertTrue(loss < 0.49);
     }
 
@@ -95,11 +95,22 @@ public class RecurrentNetworkTest {
                 .learningRate(0.001)
                 .recurrentLayerType(RecurrentLayerType.NO_OUTPUT)
                 .build();
-        List<RecurrentLayerTopology> topologies = List.of(topology);
+
+        LstmLayerTopology topology1 = LstmLayerTopology.builder()
+                .inputSize(25)
+                .outputCount(1)
+                .outputSize(2)
+                .hiddenSize(20)
+                .learningRate(0.001)
+                .recurrentLayerType(RecurrentLayerType.NO_OUTPUT)
+                .build();
+
+        List<RecurrentLayerTopology> topologies = List.of(topology, topology1);
         RecurrentNetwork recurrentNetwork = new RecurrentNetwork(topologies, LossFunction.MAE);
-        for (int i = 0; i < train.getSize(); i++) {
-            recurrentNetwork.predict(train.getInputSignals(i));
-        }
+        recurrentNetwork.learn(train, 150);
+        double loss = calcLoss(recurrentNetwork, test);
+        System.out.println(loss);
+        assertTrue(loss < 0.5);
     }
 
     public static RecurrentDataset getDatasetFromFile(String filename) throws DataSetException, IOException,

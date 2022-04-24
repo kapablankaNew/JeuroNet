@@ -35,6 +35,7 @@ public class GruLayer extends AbstractRecurrentLayer implements Serializable {
         lastOutputs = new ArrayList<>();
         updateInputs();
         Vector h = new Vector(hiddenSize, VectorType.COLUMN);
+        lastValuesH.add(h);
         Vector z, r, o, zz, rr, oo, y;
         // Additional values
         Vector first, second;
