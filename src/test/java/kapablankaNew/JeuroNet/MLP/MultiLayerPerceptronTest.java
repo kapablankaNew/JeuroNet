@@ -4,12 +4,14 @@ import kapablankaNew.JeuroNet.DataSet;
 import kapablankaNew.JeuroNet.DataSetException;
 import kapablankaNew.JeuroNet.Mathematical.ActivationFunction;
 import kapablankaNew.JeuroNet.TopologyException;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collections;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class MultiLayerPerceptronTest {
 
@@ -37,10 +39,10 @@ public class MultiLayerPerceptronTest {
         NN.learn(dataSet, 1_000_000);
 
         //check results
-        Assert.assertTrue(NN.predict(Arrays.asList(0.0, 0.0)).get(0) < 0.1);
-        Assert.assertTrue(NN.predict(Arrays.asList(0.0, 1.0)).get(0) > 0.9);
-        Assert.assertTrue(NN.predict(Arrays.asList(1.0, 0.0)).get(0) > 0.9);
-        Assert.assertTrue(NN.predict(Arrays.asList(1.0, 1.0)).get(0) < 0.1);
+        assertTrue(NN.predict(Arrays.asList(0.0, 0.0)).get(0) < 0.1);
+        assertTrue(NN.predict(Arrays.asList(0.0, 1.0)).get(0) > 0.9);
+        assertTrue(NN.predict(Arrays.asList(1.0, 0.0)).get(0) > 0.9);
+        assertTrue(NN.predict(Arrays.asList(1.0, 1.0)).get(0) < 0.1);
     }
 
     @Test
@@ -53,7 +55,8 @@ public class MultiLayerPerceptronTest {
         dataSet.addData(Arrays.asList(1.0, 2.0), Arrays.asList(0.0, 1.0));
         MultiLayerPerceptron NN = new MultiLayerPerceptron(topology);
         NN.learn(dataSet, 2);
-        NN.save("TestNN");
-        MultiLayerPerceptron NN_1 = MultiLayerPerceptron.load("TestNN");
+        NN.save("TestNN.jnn");
+        MultiLayerPerceptron NnLoaded = MultiLayerPerceptron.load("TestNN.jnn");
+        assertEquals(NN, NnLoaded);
     }
 }

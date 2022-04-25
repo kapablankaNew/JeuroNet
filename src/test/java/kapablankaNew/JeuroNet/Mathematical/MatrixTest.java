@@ -1,11 +1,10 @@
 package kapablankaNew.JeuroNet.Mathematical;
 
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.util.Arrays;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class MatrixTest {
 
@@ -19,7 +18,7 @@ public class MatrixTest {
         Matrix expected = new Matrix(Arrays.asList(-1.0, 3.0, 2.0,
                 6.0, 2.0, 5.0), 2, 3);
 
-        Assert.assertEquals(expected, res);
+        assertEquals(expected, res);
     }
 
     @Test
@@ -32,7 +31,7 @@ public class MatrixTest {
         Matrix expected = new Matrix(Arrays.asList(3.0, 1.0, 4.0,
                 2.0, 8.0, 7.0), 2, 3);
 
-        Assert.assertEquals(expected, res);
+        assertEquals(expected, res);
     }
 
     @Test
@@ -45,7 +44,7 @@ public class MatrixTest {
         Vector res = m1.mul(v2);
         Vector expected = new Vector(Arrays.asList(14.0, 32.0, 50.0, 68.0), VectorType.COLUMN);
 
-        Assert.assertEquals(expected, res);
+        assertEquals(expected, res);
 
         m1 = new Matrix(Arrays.asList(1.0, 2.0,
                 3.0, 4.0,
@@ -57,7 +56,7 @@ public class MatrixTest {
                 35.0, 46.0, 57.0, 68.0), 3, 4);
         Matrix result = m1.mul(m2);
 
-        Assert.assertEquals(expectedMatrix, result);
+        assertEquals(expectedMatrix, result);
 
         m1 = new Matrix(Arrays.asList(1.0, 2.0,
                 3.0, 4.0,
@@ -67,7 +66,7 @@ public class MatrixTest {
                 -6.0, -8.0,
                 -10.0, -12.0), 3, 2);
 
-        Assert.assertEquals(expectedMatrix, result);
+        assertEquals(expectedMatrix, result);
 
         m1 = new Matrix(Arrays.asList(1.0, 2.0,
                 3.0, 4.0,
@@ -80,7 +79,7 @@ public class MatrixTest {
                 15.0, 24.0,
                 35.0, 48.0), 3, 2);
 
-        Assert.assertEquals(expectedMatrix, result);
+        assertEquals(expectedMatrix, result);
     }
 
     @Test
@@ -92,7 +91,7 @@ public class MatrixTest {
                 2.0, 5.0,
                 3.0, 6.0), 3, 2);
 
-        Assert.assertEquals(expectedMatrix, result);
+        assertEquals(expectedMatrix, result);
     }
 
     @Test
@@ -102,6 +101,6 @@ public class MatrixTest {
         Matrix result = m1.limit(2.0, 4.5);
         Matrix expected = new Matrix(Arrays.asList(2.0, 2.0, 3.0,
                 4.0, 4.5, 4.5), 2, 3);
-        Assert.assertEquals(expected, result);
+        assertEquals(expected, result);
     }
 }

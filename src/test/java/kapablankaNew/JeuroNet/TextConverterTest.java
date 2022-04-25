@@ -2,14 +2,13 @@ package kapablankaNew.JeuroNet;
 
 import kapablankaNew.JeuroNet.Mathematical.Vector;
 import kapablankaNew.JeuroNet.Mathematical.VectorType;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class TextConverterTest {
 
@@ -25,6 +24,6 @@ public class TextConverterTest {
         expected.add(exp);
         exp = new Vector(Arrays.asList(1.0, 0.0, 0.0), VectorType.COLUMN);
         expected.add(exp);
-        Assert.assertEquals(expected, result);
+        assertEquals(expected, result);
     }
 }

@@ -3,13 +3,14 @@ package kapablankaNew.JeuroNet.Mathematical;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
 @EqualsAndHashCode
-public class Matrix {
+public class Matrix implements Serializable {
     @Getter
     private final int rows;
 
@@ -69,6 +70,10 @@ public class Matrix {
             }
             this.elements.add(row);
         }
+    }
+
+    public Matrix(Matrix other) throws VectorMatrixException {
+        this(other.getRows(), other.getColumns(), other.getElements());
     }
 
     public Matrix add(Matrix matrix) throws VectorMatrixException {
@@ -166,6 +171,15 @@ public class Matrix {
             result.add(row);
         }
         return new Matrix(this.getRows(), this.getColumns(), result);
+    }
+
+    public Matrix pow(int n) throws VectorMatrixException {
+        if (n == 1) {
+            return new Matrix(this);
+        }
+        else {
+            return this.mul(this.pow(n - 1));
+        }
     }
 
     //method for transposing

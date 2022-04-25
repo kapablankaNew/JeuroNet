@@ -1,6 +1,7 @@
 package kapablankaNew.JeuroNet.MLP;
 
 import kapablankaNew.JeuroNet.Mathematical.ActivationFunction;
+import lombok.EqualsAndHashCode;
 import lombok.NonNull;
 
 import java.io.*;
@@ -10,7 +11,8 @@ import java.util.List;
 
 import kapablankaNew.JeuroNet.*;
 
-public class MultiLayerPerceptron implements Serializable {
+@EqualsAndHashCode
+public class MultiLayerPerceptron implements Storable {
     private final List<Layer> layers;
 
     private final Topology topology;
@@ -192,7 +194,11 @@ public class MultiLayerPerceptron implements Serializable {
     }
 
     //this method allowed to save the neural network to the specified file
+    @Override
     public void save(String path) throws IOException {
+        if (! path.endsWith(".jnn")) {
+            throw new IOException("Incorrect filename! File format must be '.jnn'!");
+        }
         FileOutputStream fileOutputStream = new FileOutputStream(path);
         ObjectOutputStream objectOutputStream = new ObjectOutputStream(fileOutputStream);
         objectOutputStream.writeObject(this);
@@ -202,6 +208,9 @@ public class MultiLayerPerceptron implements Serializable {
 
     //this method allowed to load the neural network from the specified file
     public static MultiLayerPerceptron load(String path) throws IOException, ClassNotFoundException {
+        if (! path.endsWith(".jnn")) {
+            throw new IOException("Incorrect filename! File format must be '.jnn'!");
+        }
         FileInputStream fileInputStream = new FileInputStream(path);
         ObjectInputStream objectInputStream = new ObjectInputStream(fileInputStream);
         MultiLayerPerceptron MLP = (MultiLayerPerceptron) objectInputStream.readObject();

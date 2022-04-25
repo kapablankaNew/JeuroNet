@@ -1,9 +1,10 @@
 package kapablankaNew.JeuroNet.Mathematical;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
-public enum ActivationFunction {
+public enum ActivationFunction implements Serializable {
     SIGMOID {
         @Override
         public double function(double x) {

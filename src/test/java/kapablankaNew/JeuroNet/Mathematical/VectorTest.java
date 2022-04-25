@@ -1,10 +1,11 @@
 package kapablankaNew.JeuroNet.Mathematical;
 
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.util.Arrays;
 import java.util.Collections;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class VectorTest {
 
@@ -14,7 +15,7 @@ public class VectorTest {
         Vector v2 = new Vector(Arrays.asList(1.0, 2.0, 3.0));
         Vector res = v1.add(v2);
         Vector expected = new Vector(Arrays.asList(2.0, 4.0, 6.0));
-        Assert.assertEquals(expected, res);
+        assertEquals(expected, res);
     }
 
     @Test
@@ -23,7 +24,7 @@ public class VectorTest {
         Vector v2 = new Vector(Arrays.asList(2.0, 1.0, 1.0));
         Vector res = v1.sub(v2);
         Vector expected = new Vector(Arrays.asList(-1.0, 1.0, 2.0));
-        Assert.assertEquals(expected, res);
+        assertEquals(expected, res);
     }
 
     @Test
@@ -34,7 +35,7 @@ public class VectorTest {
         Matrix expected = new Matrix(1, 1,
                 Collections.singletonList(Collections.singletonList(32.0)));
 
-        Assert.assertEquals(expected, res);
+        assertEquals(expected, res);
 
         v1 = new Vector(Arrays.asList(1.0, 2.0, 3.0), VectorType.COLUMN);
         v2 = new Vector(Arrays.asList(4.0, 5.0, 6.0, 7.0), VectorType.ROW);
@@ -44,7 +45,7 @@ public class VectorTest {
                 12.0, 15.0, 18.0, 21.0),
                 3, 4);
 
-        Assert.assertEquals(expected, res);
+        assertEquals(expected, res);
 
         v1 = new Vector(Arrays.asList(1.0, 2.0, 3.0), VectorType.ROW);
         Matrix m1 = new Matrix(Arrays.asList(1.0, 2.0, 3.0, 4.0,
@@ -54,20 +55,20 @@ public class VectorTest {
         Vector result = v1.mul(m1);
         Vector expectedResult = new Vector(Arrays.asList(38.0, 44.0, 50.0, 56.0), VectorType.ROW);
 
-        Assert.assertEquals(expectedResult, result);
+        assertEquals(expectedResult, result);
 
         v1 = new Vector(Arrays.asList(1.0, 2.0, 3.0), VectorType.ROW);
         result = v1.mul(3.0);
         expectedResult = new Vector(Arrays.asList(3.0, 6.0, 9.0), VectorType.ROW);
 
-        Assert.assertEquals(expectedResult, result);
+        assertEquals(expectedResult, result);
 
         v1 = new Vector(Arrays.asList(1.0, 2.0, 3.0), VectorType.ROW);
         v2 = new Vector(Arrays.asList(4.0, 5.0, 6.0), VectorType.ROW);
         result = v1.mulElemByElem(v2);
         expectedResult = new Vector(Arrays.asList(4.0, 10.0, 18.0), VectorType.ROW);
 
-        Assert.assertEquals(expectedResult, result);
+        assertEquals(expectedResult, result);
     }
 
     @Test
@@ -76,13 +77,13 @@ public class VectorTest {
         Vector expected = new Vector(Arrays.asList(1.0, 2.0, 3.0), VectorType.ROW);
         Vector result = v1.T();
 
-        Assert.assertEquals(expected, result);
+        assertEquals(expected, result);
 
         v1 = new Vector(Arrays.asList(3.0, 2.0, 1.0), VectorType.ROW);
         expected = new Vector(Arrays.asList(3.0, 2.0, 1.0), VectorType.COLUMN);
         result = v1.T();
 
-        Assert.assertEquals(expected, result);
+        assertEquals(expected, result);
     }
 
     @Test
@@ -90,6 +91,6 @@ public class VectorTest {
         Vector v1 = new Vector(Arrays.asList(1.0, 2.0, 3.0, 4.0, 5.0), VectorType.COLUMN);
         Vector result = v1.limit(2.0, 3.5);
         Vector expected = new Vector(Arrays.asList(2.0, 2.0, 3.0, 3.5, 3.5), VectorType.COLUMN);
-        Assert.assertEquals(expected, result);
+        assertEquals(expected, result);
     }
 }

@@ -4,6 +4,7 @@ import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NonNull;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -12,7 +13,7 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 @EqualsAndHashCode
-public class Vector {
+public class Vector implements Serializable {
     @Getter
     private final List<Double> elements;
 
@@ -49,6 +50,14 @@ public class Vector {
         this.elements = new ArrayList<>();
         this.elements.addAll(vector.elements);
         this.type = type;
+    }
+
+    public static Vector getVectorWithElementsOfOne(int size, VectorType type) {
+        List<Double> elements = new ArrayList<>();
+        for (int i = 0; i < size; i++) {
+            elements.add(1.0);
+        }
+        return new Vector(elements, type);
     }
 
     public int size() {

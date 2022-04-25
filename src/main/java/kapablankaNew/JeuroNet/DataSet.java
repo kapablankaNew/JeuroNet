@@ -1,13 +1,19 @@
 package kapablankaNew.JeuroNet;
 
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NonNull;
 
-import java.io.Serializable;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.util.ArrayList;
 import java.util.List;
 
-public class DataSet implements Serializable {
+@EqualsAndHashCode
+public class DataSet implements Storable {
     private final List<List<Double>> inputSignals;
 
     private final List<List<Double>> expectedResults;
@@ -130,5 +136,23 @@ public class DataSet implements Serializable {
         for (int i = 0; i < inputCount; i++) {
             inputSignals.set(i, (inputSignals.get(i) - min.get(i)) / (max.get(i) - min.get(i)));
         }
+    }
+
+    @Override
+    public void save(String path) throws IOException {
+        FileOutputStream fileOutputStream = new FileOutputStream(path);
+        ObjectOutputStream objectOutputStream = new ObjectOutputStream(fileOutputStream);
+        objectOutputStream.writeObject(this);
+        objectOutputStream.close();
+        fileOutputStream.close();
+    }
+
+    public static DataSet load(String path) throws IOException, ClassNotFoundException {
+        FileInputStream fileInputStream = new FileInputStream(path);
+        ObjectInputStream objectInputStream = new ObjectInputStream(fileInputStream);
+        DataSet dataset = (DataSet) objectInputStream.readObject();
+        objectInputStream.close();
+        fileInputStream.close();
+        return dataset;
     }
 }
