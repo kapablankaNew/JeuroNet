@@ -1,6 +1,7 @@
-package kapablankaNew.JeuroNet.Recurrent;
+package kapablankaNew.JeuroNet.Recurrent.Interfaces;
 
 import kapablankaNew.JeuroNet.Mathematical.VectorMatrixException;
+import kapablankaNew.JeuroNet.Recurrent.RecurrentLayerType;
 
 public interface RecurrentLayerTopology {
     RecurrentLayer createRecurrentLayer() throws VectorMatrixException;

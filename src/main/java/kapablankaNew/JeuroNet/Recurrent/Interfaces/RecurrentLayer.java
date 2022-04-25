@@ -1,4 +1,4 @@
-package kapablankaNew.JeuroNet.Recurrent;
+package kapablankaNew.JeuroNet.Recurrent.Interfaces;
 
 import kapablankaNew.JeuroNet.Mathematical.Vector;
 import kapablankaNew.JeuroNet.Mathematical.VectorMatrixException;

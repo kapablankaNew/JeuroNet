@@ -1,5 +1,6 @@
-package kapablankaNew.JeuroNet.Recurrent;
+package kapablankaNew.JeuroNet.Recurrent.Interfaces;
 
+import kapablankaNew.JeuroNet.Recurrent.RecurrentLayerType;
 import kapablankaNew.JeuroNet.TopologyException;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;

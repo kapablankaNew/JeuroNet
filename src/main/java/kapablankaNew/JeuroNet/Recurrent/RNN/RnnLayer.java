@@ -1,4 +1,4 @@
-package kapablankaNew.JeuroNet.Recurrent;
+package kapablankaNew.JeuroNet.Recurrent.RNN;
 
 /*
 This class implements simple recurrent neural network of the RNN type
@@ -23,6 +23,7 @@ import kapablankaNew.JeuroNet.Mathematical.Matrix;
 import kapablankaNew.JeuroNet.Mathematical.Vector;
 import kapablankaNew.JeuroNet.Mathematical.VectorMatrixException;
 import kapablankaNew.JeuroNet.Mathematical.VectorType;
+import kapablankaNew.JeuroNet.Recurrent.Interfaces.AbstractRecurrentLayer;
 import lombok.EqualsAndHashCode;
 import lombok.NonNull;
 

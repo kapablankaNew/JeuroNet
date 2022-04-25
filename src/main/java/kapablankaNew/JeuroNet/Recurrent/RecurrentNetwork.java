@@ -3,6 +3,8 @@ package kapablankaNew.JeuroNet.Recurrent;
 import kapablankaNew.JeuroNet.Mathematical.LossFunction;
 import kapablankaNew.JeuroNet.Mathematical.Vector;
 import kapablankaNew.JeuroNet.Mathematical.VectorMatrixException;
+import kapablankaNew.JeuroNet.Recurrent.Interfaces.RecurrentLayer;
+import kapablankaNew.JeuroNet.Recurrent.Interfaces.RecurrentLayerTopology;
 import kapablankaNew.JeuroNet.Storable;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;

@@ -1,7 +1,10 @@
-package kapablankaNew.JeuroNet.Recurrent;
+package kapablankaNew.JeuroNet.Recurrent.RNN;
 
 import kapablankaNew.JeuroNet.Mathematical.ActivationFunction;
 import kapablankaNew.JeuroNet.Mathematical.VectorMatrixException;
+import kapablankaNew.JeuroNet.Recurrent.Interfaces.AbstractRecurrentLayerTopology;
+import kapablankaNew.JeuroNet.Recurrent.Interfaces.RecurrentLayer;
+import kapablankaNew.JeuroNet.Recurrent.RecurrentLayerType;
 import kapablankaNew.JeuroNet.TopologyException;
 import lombok.Builder;
 import lombok.EqualsAndHashCode;
