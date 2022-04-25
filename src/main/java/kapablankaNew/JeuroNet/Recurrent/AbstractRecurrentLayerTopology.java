@@ -1,10 +1,13 @@
 package kapablankaNew.JeuroNet.Recurrent;
 
 import kapablankaNew.JeuroNet.TopologyException;
-import lombok.Builder;
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 
-public abstract class AbstractRecurrentLayerTopology implements RecurrentLayerTopology{
+import java.io.Serializable;
+
+@EqualsAndHashCode
+public abstract class AbstractRecurrentLayerTopology implements RecurrentLayerTopology, Serializable {
     @Getter
     private final int inputSize;
 

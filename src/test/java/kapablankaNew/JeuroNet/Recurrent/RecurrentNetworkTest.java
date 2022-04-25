@@ -24,6 +24,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class RecurrentNetworkTest {
@@ -65,7 +66,7 @@ public class RecurrentNetworkTest {
                 .outputSize(25)
                 .hiddenSize(20)
                 .learningRate(0.001)
-                .recurrentLayerType(RecurrentLayerType.NO_OUTPUT)
+                .recurrentLayerType(RecurrentLayerType.NO_INPUT)
                 .build();
 
         GruLayerTopology topology1 = GruLayerTopology.builder()
@@ -82,7 +83,7 @@ public class RecurrentNetworkTest {
         recurrentNetwork.learn(train, 150);
         double loss = calcLoss(recurrentNetwork, test);
         System.out.println(loss);
-        assertTrue(loss < 0.49);
+        assertTrue(loss < 0.5);
     }
 
     @Test
@@ -93,7 +94,7 @@ public class RecurrentNetworkTest {
                 .outputSize(25)
                 .hiddenSize(20)
                 .learningRate(0.001)
-                .recurrentLayerType(RecurrentLayerType.NO_OUTPUT)
+                .recurrentLayerType(RecurrentLayerType.NO_INPUT)
                 .build();
 
         LstmLayerTopology topology1 = LstmLayerTopology.builder()
@@ -109,8 +110,45 @@ public class RecurrentNetworkTest {
         RecurrentNetwork recurrentNetwork = new RecurrentNetwork(topologies, LossFunction.MAE);
         recurrentNetwork.learn(train, 150);
         double loss = calcLoss(recurrentNetwork, test);
-        System.out.println(loss);
         assertTrue(loss < 0.5);
+    }
+
+    @Test
+    public void saveLoadTest() throws TopologyException, VectorMatrixException, IOException, ClassNotFoundException {
+        RnnLayerTopology topology = RnnLayerTopology.builder()
+                .inputSize(converter.getNumberUniqueWords())
+                .outputCount(20)
+                .outputSize(10)
+                .hiddenSize(10)
+                .learningRate(0.0001)
+                .activationFunction(ActivationFunction.TANH)
+                .recurrentLayerType(RecurrentLayerType.NO_INPUT)
+                .build();
+
+        GruLayerTopology topology1 = GruLayerTopology.builder()
+                .inputSize(10)
+                .outputCount(20)
+                .outputSize(5)
+                .hiddenSize(10)
+                .learningRate(0.001)
+                .recurrentLayerType(RecurrentLayerType.ALL_INPUT_ALL_OUTPUT)
+                .build();
+
+        LstmLayerTopology topology2 = LstmLayerTopology.builder()
+                .inputSize(5)
+                .outputCount(1)
+                .outputSize(2)
+                .hiddenSize(5)
+                .learningRate(0.001)
+                .recurrentLayerType(RecurrentLayerType.NO_OUTPUT)
+                .build();
+
+        List<RecurrentLayerTopology> topologies = List.of(topology, topology1, topology2);
+        RecurrentNetwork recurrentNetwork = new RecurrentNetwork(topologies, LossFunction.MAE);
+        recurrentNetwork.learn(train, 150);
+        recurrentNetwork.save("Recurrent.jnn");
+        RecurrentNetwork recurrentNetwork1 = RecurrentNetwork.load("Recurrent.jnn");
+        assertEquals(recurrentNetwork, recurrentNetwork1);
     }
 
     public static RecurrentDataset getDatasetFromFile(String filename) throws DataSetException, IOException,

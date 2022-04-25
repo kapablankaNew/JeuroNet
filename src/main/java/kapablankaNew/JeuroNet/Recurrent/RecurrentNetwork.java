@@ -3,13 +3,21 @@ package kapablankaNew.JeuroNet.Recurrent;
 import kapablankaNew.JeuroNet.Mathematical.LossFunction;
 import kapablankaNew.JeuroNet.Mathematical.Vector;
 import kapablankaNew.JeuroNet.Mathematical.VectorMatrixException;
+import kapablankaNew.JeuroNet.Storable;
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NonNull;
 
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.util.ArrayList;
 import java.util.List;
 
-public class RecurrentNetwork {
+@EqualsAndHashCode
+public class RecurrentNetwork implements Storable {
     private final List<RecurrentLayer> layers;
 
     @Getter
@@ -62,5 +70,29 @@ public class RecurrentNetwork {
                 }
             }
         }
+    }
+
+    @Override
+    public void save(String path) throws IOException {
+        if (! path.endsWith(".jnn")) {
+            throw new IOException("Incorrect filename! File format must be '.jnn'!");
+        }
+        FileOutputStream fileOutputStream = new FileOutputStream(path);
+        ObjectOutputStream objectOutputStream = new ObjectOutputStream(fileOutputStream);
+        objectOutputStream.writeObject(this);
+        objectOutputStream.close();
+        fileOutputStream.close();
+    }
+
+    public static RecurrentNetwork load(String path) throws IOException, ClassNotFoundException {
+        if (! path.endsWith(".jnn")) {
+            throw new IOException("Incorrect filename! File format must be '.jnn'!");
+        }
+        FileInputStream fileInputStream = new FileInputStream(path);
+        ObjectInputStream objectInputStream = new ObjectInputStream(fileInputStream);
+        RecurrentNetwork network = (RecurrentNetwork) objectInputStream.readObject();
+        objectInputStream.close();
+        fileInputStream.close();
+        return network;
     }
 }

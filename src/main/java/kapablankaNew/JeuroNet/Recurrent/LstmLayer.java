@@ -5,12 +5,14 @@ import kapablankaNew.JeuroNet.Mathematical.Matrix;
 import kapablankaNew.JeuroNet.Mathematical.Vector;
 import kapablankaNew.JeuroNet.Mathematical.VectorMatrixException;
 import kapablankaNew.JeuroNet.Mathematical.VectorType;
+import lombok.EqualsAndHashCode;
 import lombok.NonNull;
 
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
+@EqualsAndHashCode(callSuper = true)
 public class LstmLayer extends AbstractRecurrentLayer implements Serializable {
     protected LstmLayer(@NonNull LstmLayerTopology topology) throws VectorMatrixException {
         super(topology);
@@ -303,8 +305,10 @@ public class LstmLayer extends AbstractRecurrentLayer implements Serializable {
 
     //Next fields storage data about last feed forward step.
     //These data use in the learning process
+    @EqualsAndHashCode.Exclude
     private List<Vector> lastValuesC, lastValuesH, lastValuesF, lastValuesI, lastValuesO, lastValuesZ;
 
+    @EqualsAndHashCode.Exclude
     private List<Vector> lastValuesFF, lastValuesII, lastValuesOO, lastValuesZZ, lastValuesCC;
 
     private final int hiddenSize;

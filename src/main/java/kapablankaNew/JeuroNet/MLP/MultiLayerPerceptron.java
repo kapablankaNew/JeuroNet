@@ -12,7 +12,7 @@ import java.util.List;
 import kapablankaNew.JeuroNet.*;
 
 @EqualsAndHashCode
-public class MultiLayerPerceptron implements Serializable {
+public class MultiLayerPerceptron implements Storable {
     private final List<Layer> layers;
 
     private final Topology topology;
@@ -194,6 +194,7 @@ public class MultiLayerPerceptron implements Serializable {
     }
 
     //this method allowed to save the neural network to the specified file
+    @Override
     public void save(String path) throws IOException {
         if (! path.endsWith(".jnn")) {
             throw new IOException("Incorrect filename! File format must be '.jnn'!");

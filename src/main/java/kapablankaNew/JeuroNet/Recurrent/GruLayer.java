@@ -5,12 +5,14 @@ import kapablankaNew.JeuroNet.Mathematical.Matrix;
 import kapablankaNew.JeuroNet.Mathematical.Vector;
 import kapablankaNew.JeuroNet.Mathematical.VectorMatrixException;
 import kapablankaNew.JeuroNet.Mathematical.VectorType;
+import lombok.EqualsAndHashCode;
 import lombok.NonNull;
 
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
+@EqualsAndHashCode(callSuper = true)
 public class GruLayer extends AbstractRecurrentLayer implements Serializable {
     protected GruLayer(@NonNull GruLayerTopology topology) throws VectorMatrixException {
         super(topology);
@@ -242,8 +244,10 @@ public class GruLayer extends AbstractRecurrentLayer implements Serializable {
 
     //Next fields storage data about last feed forward step.
     //These data use in the learning process
+    @EqualsAndHashCode.Exclude
     private List<Vector> lastValuesH, lastValuesZ, lastValuesR, lastValuesO;
 
+    @EqualsAndHashCode.Exclude
     private List<Vector> lastValuesZZ, lastValuesRR, lastValuesOO;
 
     private final int hiddenSize;

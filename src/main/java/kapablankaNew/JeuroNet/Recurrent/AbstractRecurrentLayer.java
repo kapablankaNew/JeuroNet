@@ -3,18 +3,23 @@ package kapablankaNew.JeuroNet.Recurrent;
 import kapablankaNew.JeuroNet.Mathematical.Matrix;
 import kapablankaNew.JeuroNet.Mathematical.Vector;
 import kapablankaNew.JeuroNet.Mathematical.VectorMatrixException;
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
 
-public abstract class AbstractRecurrentLayer implements RecurrentLayer {
+@EqualsAndHashCode
+public abstract class AbstractRecurrentLayer implements RecurrentLayer, Serializable {
     @Getter
     protected final RecurrentLayerTopology topology;
 
+    @EqualsAndHashCode.Exclude
     protected List<Vector> lastInputs;
 
+    @EqualsAndHashCode.Exclude
     protected List<Vector> lastOutputs;
 
     protected AbstractRecurrentLayer(RecurrentLayerTopology topology) {

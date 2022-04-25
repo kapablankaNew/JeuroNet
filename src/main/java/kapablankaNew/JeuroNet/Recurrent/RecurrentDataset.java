@@ -2,15 +2,20 @@ package kapablankaNew.JeuroNet.Recurrent;
 
 import kapablankaNew.JeuroNet.DataSetException;
 import kapablankaNew.JeuroNet.Mathematical.Vector;
+import kapablankaNew.JeuroNet.Storable;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 
-import java.io.Serializable;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.util.ArrayList;
 import java.util.List;
 
 @EqualsAndHashCode
-public class RecurrentDataset implements Serializable {
+public class RecurrentDataset implements Storable {
     private final List<List<Vector>> inputSignals;
 
     private final List<List<Vector>> expectedOutputs;
@@ -83,5 +88,23 @@ public class RecurrentDataset implements Serializable {
             outs.add(vector);
         }
         expectedOutputs.add(outs);
+    }
+
+    @Override
+    public void save(String path) throws IOException {
+        FileOutputStream fileOutputStream = new FileOutputStream(path);
+        ObjectOutputStream objectOutputStream = new ObjectOutputStream(fileOutputStream);
+        objectOutputStream.writeObject(this);
+        objectOutputStream.close();
+        fileOutputStream.close();
+    }
+
+    public static RecurrentDataset load(String path) throws IOException, ClassNotFoundException {
+        FileInputStream fileInputStream = new FileInputStream(path);
+        ObjectInputStream objectInputStream = new ObjectInputStream(fileInputStream);
+        RecurrentDataset dataset = (RecurrentDataset) objectInputStream.readObject();
+        objectInputStream.close();
+        fileInputStream.close();
+        return dataset;
     }
 }
