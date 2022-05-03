@@ -78,8 +78,8 @@ public enum LossFunction implements Serializable {
     public abstract double loss(List<Double> actual, List<Double> expected);
 
     public double loss(Vector actual, Vector expected) {
-        List<Double> act = actual.getElements();
-        List<Double> exp = expected.getElements();
+        List<Double> act = actual.getElementsAsList();
+        List<Double> exp = expected.getElementsAsList();
         return this.loss(act, exp);
     }
 
@@ -89,8 +89,8 @@ public enum LossFunction implements Serializable {
         if (actual.getType() != expected.getType()) {
             throw new VectorMatrixException("It's not possible to calculate gradient for row and column!");
         }
-        List<Double> act = actual.getElements();
-        List<Double> exp = expected.getElements();
+        List<Double> act = actual.getElementsAsList();
+        List<Double> exp = expected.getElementsAsList();
         return new Vector(this.gradient(act, exp), actual.getType());
     }
 }

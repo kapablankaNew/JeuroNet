@@ -5,6 +5,7 @@ import lombok.Getter;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -18,19 +19,12 @@ public class Matrix implements Serializable {
     private final int columns;
 
     @Getter
-    private final List<List<Double>> elements;
+    private final double[][] elements;
 
     public Matrix(int rows, int columns) {
         this.rows = rows;
         this.columns = columns;
-        elements = new ArrayList<>();
-        for (int i = 0; i < rows; i++) {
-            List<Double> row = new ArrayList<>();
-            for (int j = 0; j < columns; j++) {
-                row.add(0.0);
-            }
-            elements.add(row);
-        }
+        elements = new double[rows][columns];
     }
 
     public Matrix (int rows, int columns, List<List<Double>> elements) throws VectorMatrixException {
@@ -45,13 +39,11 @@ public class Matrix implements Serializable {
         this.rows = rows;
         this.columns = columns;
 
-        this.elements = new ArrayList<>();
+        this.elements = new double[rows][columns];
         for (int i = 0; i < rows; i++) {
-            List<Double> row = new ArrayList<>();
             for (int j = 0; j < columns; j++) {
-                row.add(elements.get(i).get(j));
+                this.elements[i][j] = elements.get(i).get(j);
             }
-            this.elements.add(row);
         }
     }
 
@@ -62,13 +54,29 @@ public class Matrix implements Serializable {
         this.rows = rows;
         this.columns = columns;
 
-        this.elements = new ArrayList<>();
+        this.elements = new double[rows][columns];
         for (int i = 0; i < rows; i++) {
-            List<Double> row = new ArrayList<>();
             for (int j = 0; j < columns; j++) {
-                row.add(elements.get(i*columns + j));
+                this.elements[i][j] = elements.get(i*columns + j);
             }
-            this.elements.add(row);
+        }
+    }
+
+    public Matrix (int rows, int columns, double[][] elements) throws VectorMatrixException {
+        if (elements.length != rows) {
+            throw new VectorMatrixException("The size of the data is not equal to the size of the matrix.");
+        }
+        for (int i = 0; i < rows; i++) {
+            if (elements[i].length != columns) {
+                throw new VectorMatrixException("The size of the data is not equal to the size of the matrix.");
+            }
+        }
+        this.rows = rows;
+        this.columns = columns;
+
+        this.elements = new double[rows][columns];
+        for (int i = 0; i < rows; i++) {
+            System.arraycopy(elements[i], 0, this.elements[i], 0, columns);
         }
     }
 
@@ -80,40 +88,42 @@ public class Matrix implements Serializable {
         if (this.getRows() != matrix.getRows() || this.getColumns() != matrix.getColumns()) {
             throw new VectorMatrixException("It's not possible to add matrices with different sizes!");
         }
-        List<List<Double>> result = new ArrayList<>();
+        double[][] result = new double[getRows()][getColumns()];
         for (int i = 0; i < this.getRows(); i++) {
-            List<Double> row = new ArrayList<>();
+            double[] resultRow = result[i];
+            double[] firstRow = this.elements[i];
+            double[] secondRow = matrix.getElements()[i];
             for (int j = 0; j < this.getColumns(); j++) {
-                row.add(this.get(i, j) + matrix.get(i, j));
+                resultRow[j] = firstRow[j] + secondRow[j];
             }
-            result.add(row);
         }
         return new Matrix(this.getRows(), this.getColumns(), result);
     }
 
     public Matrix sub(Matrix matrix) throws VectorMatrixException {
         if (this.getRows() != matrix.getRows() || this.getColumns() != matrix.getColumns()) {
-            throw new VectorMatrixException("It's not possible to subtract matrices with different sizes!");
+            throw new VectorMatrixException("It's not possible to add matrices with different sizes!");
         }
-        List<List<Double>> result = new ArrayList<>();
+        double[][] result = new double[getRows()][getColumns()];
         for (int i = 0; i < this.getRows(); i++) {
-            List<Double> row = new ArrayList<>();
+            double[] resultRow = result[i];
+            double[] firstRow = this.elements[i];
+            double[] secondRow = matrix.getElements()[i];
             for (int j = 0; j < this.getColumns(); j++) {
-                row.add(this.get(i, j) - matrix.get(i, j));
+                resultRow[j] = firstRow[j] - secondRow[j];
             }
-            result.add(row);
         }
         return new Matrix(this.getRows(), this.getColumns(), result);
     }
 
     public Matrix mul(Double value) throws VectorMatrixException {
-        List<List<Double>> result = new ArrayList<>();
-        for (List<Double> oldRow : this.elements) {
-            List<Double> row = new ArrayList<>();
-            for (Double val : oldRow) {
-                row.add(val * value);
+        double[][] result = new double[getRows()][getColumns()];
+        for (int i = 0; i < getRows(); i++) {
+            double[] row = elements[i];
+            double[] resultRow = result[i];
+            for (int j = 0; j < getColumns(); j++) {
+                resultRow[j] = row[j] * value;
             }
-            result.add(row);
         }
         return new Matrix(this.getRows(), this.getColumns(), result);
     }
@@ -125,50 +135,55 @@ public class Matrix implements Serializable {
         if (this.getColumns() != vector.size()) {
             throw new VectorMatrixException("It's not possible to multiply matrix and vector with different sizes!");
         }
-        List<Double> result = new ArrayList<>();
+        double[] result = new double[this.getRows()];
 
         for (int i = 0; i < this.getRows(); i++) {
             double elem = 0.0;
+            double[] firstRow = elements[i];
             for (int j = 0; j < this.getColumns(); j++) {
-                elem += vector.get(j) * this.get(i, j);
+                elem += vector.get(j) * firstRow[j];
             }
-            result.add(elem);
+            result[i] = elem;
         }
-
-        return new Vector(result, VectorType.COLUMN);
+        List<Double> resultList = new ArrayList<>();
+        for (double elem : result) {
+            resultList.add(elem);
+        }
+        return new Vector(resultList, VectorType.COLUMN);
     }
 
     public Matrix mul(Matrix matrix) throws VectorMatrixException {
         if (this.getColumns() != matrix.getRows()) {
             throw new VectorMatrixException("It's not possible to multiply matrices with different sizes!");
         }
-        List<List<Double>> result = new ArrayList<>();
+        double[][] result = new double[this.getRows()][matrix.getColumns()];
         for (int i = 0; i < this.getRows(); i++) {
-            List<Double> row = new ArrayList<>();
+            double[] resultRow = result[i];
+            double[] firstRow = this.elements[i];
             for (int j = 0; j < matrix.getColumns(); j++) {
+                double[] secondColumn = matrix.getColumn(j);
                 double elem = 0.0;
                 for (int k = 0; k < this.getColumns(); k++) {
-                    elem += this.get(i, k) * matrix.get(k, j);
+                    elem += firstRow[k] * secondColumn[k];
                 }
-                row.add(elem);
+                resultRow[j] = elem;
             }
-            result.add(row);
         }
         return new Matrix(this.getRows(), matrix.getColumns(), result);
     }
 
     public Matrix mulElemByElem(Matrix matrix) throws VectorMatrixException {
         if (this.getRows() != matrix.getRows() || this.getColumns() != matrix.getColumns()) {
-            throw new VectorMatrixException("It's not possible to multiply element-by-element matrices of different sizes!");
+            throw new VectorMatrixException("It's not possible to add matrices with different sizes!");
         }
-        List<List<Double>> result = new ArrayList<>();
-
+        double[][] result = new double[getRows()][getColumns()];
         for (int i = 0; i < this.getRows(); i++) {
-            List<Double> row = new ArrayList<>();
+            double[] resultRow = result[i];
+            double[] firstRow = this.elements[i];
+            double[] secondRow = matrix.getElements()[i];
             for (int j = 0; j < this.getColumns(); j++) {
-                row.add(this.get(i, j) * matrix.get(i, j));
+                resultRow[j] = firstRow[j] * secondRow[j];
             }
-            result.add(row);
         }
         return new Matrix(this.getRows(), this.getColumns(), result);
     }
@@ -184,13 +199,11 @@ public class Matrix implements Serializable {
 
     //method for transposing
     public Matrix T() throws VectorMatrixException {
-        List<List<Double>> result = new ArrayList<>();
+        double[][] result = new double[getColumns()][getRows()];
         for (int i = 0; i < this.getColumns(); i++) {
-            List<Double> row = new ArrayList<>();
             for (int j = 0; j < this.getRows(); j++) {
-                row.add(this.get(j, i));
+                result[i][j] = elements[j][i];
             }
-            result.add(row);
         }
         return new Matrix(this.getColumns(), this.getRows(), result);
     }
@@ -198,34 +211,45 @@ public class Matrix implements Serializable {
     //Method for limiting values in a vector. For example, if m1 is Matrix [[1, 2, 3], [4, 5, 6]]
     //and res = m1.limit(2, 4), then res is Matrix [[2, 2, 3], [4, 4, 4]]
     public Matrix limit (double min, double max) throws VectorMatrixException {
-        List<List<Double>> result = new ArrayList<>();
+        double[][] result = new double[getRows()][getColumns()];
         for (int i = 0; i < this.getRows(); i++) {
-            List<Double> row = new ArrayList<>();
+            double[] row = elements[i];
+            double[] resultRow = result[i];
             for (int j = 0; j < this.getColumns(); j++) {
-                if (this.get(i, j) > max) {
-                    row.add(max);
-                } else if (this.get(i, j) < min) {
-                    row.add(min);
+                if (row[j] > max) {
+                    resultRow[j] = max;
+                } else if (row[j] < min) {
+                    resultRow[j] = min;
                 } else {
-                    row.add(this.get(i, j));
+                    resultRow[j] = row[j];
                 }
             }
-            result.add(row);
         }
         return new Matrix(this.getRows(), this.getColumns(), result);
     }
 
     public double get(int row, int column) {
-        return elements.get(row).get(column);
+        return elements[row][column];
+    }
+
+    protected double[] getRow(int row) {
+        return elements[row];
+    }
+
+    protected double[] getColumn(int column) {
+        double[] result = new double[getRows()];
+        for (int i = 0; i < result.length; i++) {
+            result[i] = elements[i][column];
+        }
+        return result;
     }
 
     @Override
     public String toString() {
-        return "[" + this.getElements().
-                stream().
-                map(s -> "[" + s.stream().
-                        map(Objects::toString).
-                        collect(Collectors.joining(",\t")) + "]").
+        return "[" + Arrays.stream(this.getElements()).map(i ->
+                Arrays.stream(i)
+                        .mapToObj(Objects::toString)
+                        .collect(Collectors.joining(",\t")) + "]").
                 collect(Collectors.joining(",\n")) + "]";
     }
 }
