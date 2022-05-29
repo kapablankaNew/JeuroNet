@@ -114,16 +114,20 @@ public class GruLayer extends AbstractRecurrentLayer implements Serializable {
         Vector bo = new Vector(localParameters.bo);
         Matrix Why = new Matrix(localParameters.Why);
         Vector by = new Vector(localParameters.by);
+
         var cache = new GruCache();
 
         cache.lastInputs = updateInputs(inputSignals);
+        cache.createArrays(cache.lastInputs.size());
+
         List<Vector> outputs = new ArrayList<>();
         Vector h = new Vector(hiddenSize, VectorType.COLUMN);
-        cache.lastValuesH.add(h);
+        cache.lastValuesH[0] = h;
         Vector z, r, o, zz, rr, oo, y;
         // Additional values
         Vector first, second;
-        for (Vector inputSignal : lastInputs) {
+        for (int i = 0; i < cache.lastInputs.size(); i++) {
+            var inputSignal = cache.lastInputs.get(i);
             // Wxz * xi
             first = Wxz.mul(inputSignal);
             // Whz * h(i-1)
@@ -163,13 +167,13 @@ public class GruLayer extends AbstractRecurrentLayer implements Serializable {
             y = (Why.mul(h)).add(by);
 
             outputs.add(y);
-            cache.lastValuesZZ.add(zz);
-            cache.lastValuesZ.add(z);
-            cache.lastValuesRR.add(rr);
-            cache.lastValuesR.add(r);
-            cache.lastValuesOO.add(oo);
-            cache.lastValuesO.add(o);
-            cache.lastValuesH.add(h);
+            cache.lastValuesZZ[i] = zz;
+            cache.lastValuesZ[i] =  z;
+            cache.lastValuesRR[i] = rr;
+            cache.lastValuesR[i] = r;
+            cache.lastValuesOO[i] = oo;
+            cache.lastValuesO[i] = o;
+            cache.lastValuesH[i + 1] = h;
         }
         cache.lastOutputs = updateOutputs(outputs);
         return cache;
@@ -202,13 +206,13 @@ public class GruLayer extends AbstractRecurrentLayer implements Serializable {
                 .by(by)
                 .build();
         GruCache cache = predictInLearning(inputSignals, localParameters);
-        List<Vector> lastValuesH = cache.lastValuesH;
-        List<Vector> lastValuesZ = cache.lastValuesZ;
-        List<Vector> lastValuesR = cache.lastValuesR;
-        List<Vector> lastValuesO = cache.lastValuesO;
-        List<Vector> lastValuesZZ = cache.lastValuesZZ;
-        List<Vector> lastValuesRR = cache.lastValuesRR;
-        List<Vector> lastValuesOO = cache.lastValuesOO;
+        Vector[] lastValuesH = cache.lastValuesH;
+        Vector[] lastValuesZ = cache.lastValuesZ;
+        Vector[] lastValuesR = cache.lastValuesR;
+        Vector[] lastValuesO = cache.lastValuesO;
+        Vector[] lastValuesZZ = cache.lastValuesZZ;
+        Vector[] lastValuesRR = cache.lastValuesRR;
+        Vector[] lastValuesOO = cache.lastValuesOO;
 
         double learningRate = topology.getLearningRate();
         List<Vector> resultErrorsGradients = new ArrayList<>();
@@ -233,7 +237,7 @@ public class GruLayer extends AbstractRecurrentLayer implements Serializable {
             Vector dL_dy = new Vector(errorsGradients.get(errorsGradients.size() - 1 - i));
 
             //calculate values dE/dby and dE/dWhy
-            d_Why = d_Why.add(dL_dy.mul(lastValuesH.get(lastValuesH.size() - 1 - i).T()));
+            d_Why = d_Why.add(dL_dy.mul(lastValuesH[(lastValuesH.length - 1 - i)].T()));
             d_by = d_by.add(dL_dy);
 
             //it is special value: dE/dzi
@@ -241,13 +245,13 @@ public class GruLayer extends AbstractRecurrentLayer implements Serializable {
 
             for (int k = inputSignals.size() - 1 - i; k >= 0; k--) {
                 Vector x = inputSignals.get(k);
-                Vector o = lastValuesO.get(k);
-                Vector z = lastValuesZ.get(k);
-                Vector r = lastValuesR.get(k);
-                Vector h_prev = lastValuesH.get(k);
-                Vector zz = lastValuesZZ.get(k);
-                Vector rr = lastValuesRR.get(k);
-                Vector oo = lastValuesOO.get(k);
+                Vector o = lastValuesO[k];
+                Vector z = lastValuesZ[k];
+                Vector r = lastValuesR[k];
+                Vector h_prev = lastValuesH[k];
+                Vector zz = lastValuesZZ[k];
+                Vector rr = lastValuesRR[k];
+                Vector oo = lastValuesOO[k];
 
                 Vector dL_dz = o.sub(h_prev).mulElemByElem(dL_dh);
                 Vector dL_dzz = dL_dz.mulElemByElem(sigma.derivative(zz));
@@ -357,26 +361,27 @@ public class GruLayer extends AbstractRecurrentLayer implements Serializable {
     }
 
     private static class GruCache {
-
         private GruCache() {
-            lastValuesH = new ArrayList<>();
-            lastValuesO = new ArrayList<>();
-            lastValuesZ = new ArrayList<>();
-            lastValuesR = new ArrayList<>();
-
-            lastValuesOO = new ArrayList<>();
-            lastValuesZZ = new ArrayList<>();
-            lastValuesRR = new ArrayList<>();
-
             lastInputs = new ArrayList<>();
             lastOutputs = new ArrayList<>();
         }
 
-        @Getter
-        private final List<Vector> lastValuesH, lastValuesZ, lastValuesR, lastValuesO;
+        private void createArrays(int size) {
+            lastValuesH = new Vector[size + 1];
+            lastValuesO = new Vector[size];
+            lastValuesZ = new Vector[size];
+            lastValuesR = new Vector[size];
+
+            lastValuesOO = new Vector[size];
+            lastValuesZZ = new Vector[size];
+            lastValuesRR = new Vector[size];
+        }
 
         @Getter
-        private final List<Vector> lastValuesZZ, lastValuesRR, lastValuesOO;
+        private Vector[] lastValuesH, lastValuesZ, lastValuesR, lastValuesO;
+
+        @Getter
+        private Vector[] lastValuesZZ, lastValuesRR, lastValuesOO;
 
         @Getter
         private List<Vector> lastInputs, lastOutputs;

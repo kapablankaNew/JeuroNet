@@ -22,6 +22,7 @@ import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executor;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.stream.IntStream;
 
@@ -98,8 +99,7 @@ public class RecurrentNetwork implements Storable {
 
     public void learnMulty(RecurrentDataset dataSet, int numberOfSteps) {
         int cores = Runtime.getRuntime().availableProcessors()/2;
-        System.out.println(cores);
-        Executor executor = Executors.newFixedThreadPool(cores);
+        ExecutorService executor = Executors.newFixedThreadPool(cores);
         try {
             CompletableFuture.allOf(IntStream.range(0, cores)
                             .mapToObj(ind -> CompletableFuture.runAsync(() -> {
@@ -113,6 +113,7 @@ public class RecurrentNetwork implements Storable {
         } catch (InterruptedException | ExecutionException e) {
             e.printStackTrace();
         }
+        executor.shutdown();
     }
 
     private void learnThread(RecurrentDataset dataSet, int numberOfSteps, int currentThread, int numberOfThreads) throws VectorMatrixException {

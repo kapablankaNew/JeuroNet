@@ -74,7 +74,7 @@ public class MatrixBenchmark {
     @Benchmark
     @BenchmarkMode(Mode.AverageTime)
     @OutputTimeUnit(TimeUnit.MILLISECONDS)
-    public void testMultiply(Blackhole blackhole) throws VectorMatrixException, ExecutionException, InterruptedException {
+    public void testMultiply(Blackhole blackhole) throws VectorMatrixException {
         Matrix res = a.mul(b);
         blackhole.consume(res);
     }

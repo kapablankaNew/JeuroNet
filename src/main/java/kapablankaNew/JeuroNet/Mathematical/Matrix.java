@@ -89,11 +89,13 @@ public class Matrix implements Serializable {
             throw new VectorMatrixException("It's not possible to add matrices with different sizes!");
         }
         double[][] result = new double[getRows()][getColumns()];
-        for (int i = 0; i < this.getRows(); i++) {
+        final int rows = this.getRows();
+        final int columns = this.getColumns();
+        for (int i = 0; i < rows; i++) {
             double[] resultRow = result[i];
             double[] firstRow = this.elements[i];
             double[] secondRow = matrix.getElements()[i];
-            for (int j = 0; j < this.getColumns(); j++) {
+            for (int j = 0; j < columns; j++) {
                 resultRow[j] = firstRow[j] + secondRow[j];
             }
         }
@@ -156,14 +158,18 @@ public class Matrix implements Serializable {
         if (this.getColumns() != matrix.getRows()) {
             throw new VectorMatrixException("It's not possible to multiply matrices with different sizes!");
         }
-        double[][] result = new double[this.getRows()][matrix.getColumns()];
-        for (int i = 0; i < this.getRows(); i++) {
+        final int rowsA = this.getRows();
+        final int columnsA = this.getColumns();
+        final int columnsB = matrix.getColumns();
+
+        double[][] result = new double[rowsA][columnsB];
+        for (int i = 0; i < rowsA; i++) {
             double[] resultRow = result[i];
             double[] firstRow = this.elements[i];
-            for (int j = 0; j < matrix.getColumns(); j++) {
+            for (int j = 0; j < columnsB; j++) {
                 double[] secondColumn = matrix.getColumn(j);
                 double elem = 0.0;
-                for (int k = 0; k < this.getColumns(); k++) {
+                for (int k = 0; k < columnsA; k++) {
                     elem += firstRow[k] * secondColumn[k];
                 }
                 resultRow[j] = elem;
