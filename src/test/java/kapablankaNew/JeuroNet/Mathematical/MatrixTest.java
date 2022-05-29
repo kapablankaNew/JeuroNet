@@ -3,6 +3,7 @@ package kapablankaNew.JeuroNet.Mathematical;
 import org.junit.jupiter.api.Test;
 
 import java.util.Arrays;
+import java.util.concurrent.ExecutionException;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -35,7 +36,7 @@ public class MatrixTest {
     }
 
     @Test
-    public void mulTest() throws VectorMatrixException {
+    public void mulTest() throws VectorMatrixException, ExecutionException, InterruptedException {
         Matrix m1 = new Matrix(Arrays.asList(1.0, 2.0, 3.0,
                 4.0, 5.0, 6.0,
                 7.0, 8.0, 9.0,

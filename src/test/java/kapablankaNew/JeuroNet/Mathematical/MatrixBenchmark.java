@@ -21,11 +21,12 @@ import java.time.Duration;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.TimeUnit;
 
 @State(Scope.Benchmark)
-@Fork(value = 3, warmups = 10, jvmArgs = {"-Xms1G", "-Xmx1G"})
+@Fork(value = 3, warmups = 3, jvmArgs = {"-Xms2G", "-Xmx2G"})
 public class MatrixBenchmark {
     @Param({"10", "100", "500", "1000"})
     public int size;
@@ -34,18 +35,23 @@ public class MatrixBenchmark {
     Matrix b;
 
     @Test
-    public void testT() throws VectorMatrixException {
+    public void testT() throws VectorMatrixException, ExecutionException, InterruptedException {
         size = 100;
-        setUp();
         for (int i = 0; i < 10; i++) {
+            setUp();
             Instant start = Instant.now();
+            //var start = System.nanoTime();
             Matrix result = a.mul(b);
+            //var finish = System.nanoTime();
             Instant finish = Instant.now();
             var n = result.getRows();
             System.out.println(n);
             Duration elapsed = Duration.between(start, finish);
-            String format = "mm:ss:SSS";
+            String format = "ss.SSS";
             System.out.println("Время, мс: " + DurationFormatUtils.formatDuration(elapsed.toMillis(), format));
+            //long duration = finish - start;
+            //double milli = duration/1000.0;
+            //System.out.println("Time, millisec: " + milli);
         }
     }
 
@@ -68,16 +74,22 @@ public class MatrixBenchmark {
     @Benchmark
     @BenchmarkMode(Mode.AverageTime)
     @OutputTimeUnit(TimeUnit.MILLISECONDS)
-    public void testMultiply(Blackhole blackhole) throws VectorMatrixException {
+    public void testMultiply(Blackhole blackhole) throws VectorMatrixException, ExecutionException, InterruptedException {
         Matrix res = a.mul(b);
         blackhole.consume(res);
     }
 
     @Test
-    public void test() throws VectorMatrixException {
-        Matrix m = getRandomSquareMatrix(10);
-        Matrix n = getRandomSquareMatrix(10);
-        Matrix res = m.mul(n);
+    public void test() throws VectorMatrixException, ExecutionException, InterruptedException {
+        size = 5000;
+        a = getRandomSquareMatrix(size);
+        b = getRandomSquareMatrix(size);
+        Instant start = Instant.now();
+        Matrix res = a.mulElemByElem(b);
+        Instant finish = Instant.now();
+        Duration elapsed = Duration.between(start, finish);
+        String format = "mm:ss.SSS";
+        System.out.println("Result time: " + DurationFormatUtils.formatDuration(elapsed.toMillis(), format));
         System.out.println(res.getRows());
     }
 

@@ -6,7 +6,11 @@ import kapablankaNew.JeuroNet.Mathematical.Vector;
 import kapablankaNew.JeuroNet.Mathematical.VectorMatrixException;
 import kapablankaNew.JeuroNet.Mathematical.VectorType;
 import kapablankaNew.JeuroNet.Recurrent.Interfaces.AbstractRecurrentLayer;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.NonNull;
 
 import java.io.Serializable;
@@ -18,27 +22,38 @@ public class GruLayer extends AbstractRecurrentLayer implements Serializable {
     protected GruLayer(@NonNull GruLayerTopology topology) throws VectorMatrixException {
         super(topology);
         hiddenSize = topology.getHiddenSize();
-        Wxz = createWeightsMatrix(topology.getHiddenSize(), topology.getInputSize());
-        Whz = createWeightsMatrix(topology.getHiddenSize(), topology.getHiddenSize());
-        Wxr = createWeightsMatrix(topology.getHiddenSize(), topology.getInputSize());
-        Whr = createWeightsMatrix(topology.getHiddenSize(), topology.getHiddenSize());
-        Wxo = createWeightsMatrix(topology.getHiddenSize(), topology.getInputSize());
-        Who = createWeightsMatrix(topology.getHiddenSize(), topology.getHiddenSize());
-        Why = createWeightsMatrix(topology.getOutputSize(), topology.getHiddenSize());
-        bz = new Vector(topology.getHiddenSize(), VectorType.COLUMN);
-        br = new Vector(topology.getHiddenSize(), VectorType.COLUMN);
-        bo = new Vector(topology.getHiddenSize(), VectorType.COLUMN);
-        by = new Vector(topology.getOutputSize(), VectorType.COLUMN);
+        parameters = new GruParameters();
+        parameters.Wxz = createWeightsMatrix(topology.getHiddenSize(), topology.getInputSize());
+        parameters.Whz = createWeightsMatrix(topology.getHiddenSize(), topology.getHiddenSize());
+        parameters.Wxr = createWeightsMatrix(topology.getHiddenSize(), topology.getInputSize());
+        parameters.Whr = createWeightsMatrix(topology.getHiddenSize(), topology.getHiddenSize());
+        parameters.Wxo = createWeightsMatrix(topology.getHiddenSize(), topology.getInputSize());
+        parameters.Who = createWeightsMatrix(topology.getHiddenSize(), topology.getHiddenSize());
+        parameters.Why = createWeightsMatrix(topology.getOutputSize(), topology.getHiddenSize());
+        parameters.bz = new Vector(topology.getHiddenSize(), VectorType.COLUMN);
+        parameters.br = new Vector(topology.getHiddenSize(), VectorType.COLUMN);
+        parameters.bo = new Vector(topology.getHiddenSize(), VectorType.COLUMN);
+        parameters.by = new Vector(topology.getOutputSize(), VectorType.COLUMN);
     }
 
     @Override
-    public List<Vector> predict(List<Vector> inputSignals) throws VectorMatrixException {
-        clearCacheValues();
+    public synchronized List<Vector> predict(List<Vector> inputSignals) throws VectorMatrixException {
+        Matrix Wxz = parameters.Wxz;
+        Matrix Whz = parameters.Whz;
+        Vector bz = parameters.bz;
+        Matrix Wxr = parameters.Wxr;
+        Matrix Whr = parameters.Whr;
+        Vector br = parameters.br;
+        Matrix Wxo = parameters.Wxo;
+        Matrix Who = parameters.Who;
+        Vector bo = parameters.bo;
+        Matrix Why = parameters.Why;
+        Vector by = parameters.by;
+
         lastInputs = new ArrayList<>(inputSignals);
         lastOutputs = new ArrayList<>();
         updateInputs();
         Vector h = new Vector(hiddenSize, VectorType.COLUMN);
-        lastValuesH.add(h);
         Vector z, r, o, zz, rr, oo, y;
         // Additional values
         Vector first, second;
@@ -82,25 +97,122 @@ public class GruLayer extends AbstractRecurrentLayer implements Serializable {
             y = (Why.mul(h)).add(by);
 
             lastOutputs.add(y);
-            lastValuesZZ.add(zz);
-            lastValuesZ.add(z);
-            lastValuesRR.add(rr);
-            lastValuesR.add(r);
-            lastValuesOO.add(oo);
-            lastValuesO.add(o);
-            lastValuesH.add(h);
         }
         updateOutputs();
         return new ArrayList<>(lastOutputs);
     }
 
+    private GruCache predictInLearning(List<Vector> inputSignals, GruParameters localParameters) throws VectorMatrixException {
+        Matrix Wxz = new Matrix(localParameters.Wxz);
+        Matrix Whz = new Matrix(localParameters.Whz);
+        Vector bz = new Vector(localParameters.bz);
+        Matrix Wxr = new Matrix(localParameters.Wxr);
+        Matrix Whr = new Matrix(localParameters.Whr);
+        Vector br = new Vector(localParameters.br);
+        Matrix Wxo = new Matrix(localParameters.Wxo);
+        Matrix Who = new Matrix(localParameters.Who);
+        Vector bo = new Vector(localParameters.bo);
+        Matrix Why = new Matrix(localParameters.Why);
+        Vector by = new Vector(localParameters.by);
+        var cache = new GruCache();
+
+        cache.lastInputs = updateInputs(inputSignals);
+        List<Vector> outputs = new ArrayList<>();
+        Vector h = new Vector(hiddenSize, VectorType.COLUMN);
+        cache.lastValuesH.add(h);
+        Vector z, r, o, zz, rr, oo, y;
+        // Additional values
+        Vector first, second;
+        for (Vector inputSignal : lastInputs) {
+            // Wxz * xi
+            first = Wxz.mul(inputSignal);
+            // Whz * h(i-1)
+            second = Whz.mul(h);
+            // Wxz * xi + Whz * h(i-1) + bz
+            zz = first.add(second).add(bz);
+            // z = Sigma(Wxz * xi + Whz * h(i-1) + bz)
+            z = sigma.function(zz);
+
+            // Wxr * xi
+            first = Wxr.mul(inputSignal);
+            // Whr * h(i-1)
+            second = Whr.mul(h);
+            // Wxr * xi + Whr * h(i-1) + br
+            rr = first.add(second).add(br);
+            // r = Sigma(Wxr * xi + Whr * h(i-1) + br)
+            r = sigma.function(rr);
+
+            // Wxo * xi
+            first = Wxo.mul(inputSignal);
+            // Who * (r ◎ h(i-1))
+            second = Who.mul(r.mulElemByElem(h));
+            // Wxo * xi + Who * (r ◎ h(i-1)) + bo
+            oo = first.add(second).add(bo);
+            // o = tanh(Wxo * xi + Who * (r ◎ h(i-1)))
+            o = tanh.function(oo);
+
+            Vector one = Vector.getVectorWithElementsOfOne(hiddenSize, VectorType.COLUMN);
+
+            // (1 - z) ◎ h(i-1)
+            first = (one.sub(z)).mulElemByElem(h);
+            // z ◎ o
+            second = z.mulElemByElem(o);
+            // hi = (1 - z) ◎ h(i-1) + z ◎ o
+            h = first.add(second);
+
+            y = (Why.mul(h)).add(by);
+
+            outputs.add(y);
+            cache.lastValuesZZ.add(zz);
+            cache.lastValuesZ.add(z);
+            cache.lastValuesRR.add(rr);
+            cache.lastValuesR.add(r);
+            cache.lastValuesOO.add(oo);
+            cache.lastValuesO.add(o);
+            cache.lastValuesH.add(h);
+        }
+        cache.lastOutputs = updateOutputs(outputs);
+        return cache;
+    }
+
     @Override
-    public List<Vector> learn(List<Vector> inputSignals, List<Vector> errorsGradients) throws VectorMatrixException {
-        predict(inputSignals);
+    public synchronized List<Vector> learn(List<Vector> inputSignals, List<Vector> errorsGradients) throws VectorMatrixException {
+        Matrix Wxz = parameters.Wxz;
+        Matrix Whz = parameters.Whz;
+        Vector bz = parameters.bz;
+        Matrix Wxr = parameters.Wxr;
+        Matrix Whr = parameters.Whr;
+        Vector br = parameters.br;
+        Matrix Wxo = parameters.Wxo;
+        Matrix Who = parameters.Who;
+        Vector bo = parameters.bo;
+        Matrix Why = parameters.Why;
+        Vector by = parameters.by;
+        GruParameters localParameters = GruParameters.builder()
+                .Wxz(Wxz)
+                .Whz(Whz)
+                .bz(bz)
+                .Wxr(Wxr)
+                .Whr(Whr)
+                .br(br)
+                .Wxo(Wxo)
+                .Who(Who)
+                .bo(bo)
+                .Why(Why)
+                .by(by)
+                .build();
+        GruCache cache = predictInLearning(inputSignals, localParameters);
+        List<Vector> lastValuesH = cache.lastValuesH;
+        List<Vector> lastValuesZ = cache.lastValuesZ;
+        List<Vector> lastValuesR = cache.lastValuesR;
+        List<Vector> lastValuesO = cache.lastValuesO;
+        List<Vector> lastValuesZZ = cache.lastValuesZZ;
+        List<Vector> lastValuesRR = cache.lastValuesRR;
+        List<Vector> lastValuesOO = cache.lastValuesOO;
+
         double learningRate = topology.getLearningRate();
         List<Vector> resultErrorsGradients = new ArrayList<>();
-        for (int i = 0; i < inputSignals.size(); i++)
-        {
+        for (int i = 0; i < inputSignals.size(); i++) {
             resultErrorsGradients.add(new Vector(topology.getInputSize()));
         }
         //create matrices for gradients
@@ -206,50 +318,67 @@ public class GruLayer extends AbstractRecurrentLayer implements Serializable {
             resultErrorsGradients.set(i, resultErrorsGradients.get(i).limit(-1.0, 1.0));
         }
         //update parameters of RNN
-        Why = Why.sub(d_Why.mul(learningRate));
-        by = by.sub(d_by.mul(learningRate));
-
-        Who = Who.sub(d_Who.mul(learningRate));
-        Wxo = Wxo.sub(d_Wxo.mul(learningRate));
-        bo = bo.sub(d_bo.mul(learningRate));
-
-        Whr = Whr.sub(d_Whr.mul(learningRate));
-        Wxr = Wxr.sub(d_Wxr.mul(learningRate));
-        br = br.sub(d_br.mul(learningRate));
-
-        Whz = Whz.sub(d_Whz.mul(learningRate));
-        Wxz = Wxz.sub(d_Wxz.mul(learningRate));
-        bz = bz.sub(d_bz.mul(learningRate));
+        parameters.updateWeights(d_Why, d_Who, d_Wxo, d_Whr, d_Wxr, d_Whz, d_Wxz, d_bz, d_br, d_bo, d_by, learningRate);
 
         return resultErrorsGradients;
-    }
-
-    private void clearCacheValues() {
-        lastValuesH = new ArrayList<>();
-        lastValuesO = new ArrayList<>();
-        lastValuesZ = new ArrayList<>();
-        lastValuesR = new ArrayList<>();
-
-        lastValuesOO = new ArrayList<>();
-        lastValuesZZ = new ArrayList<>();
-        lastValuesRR = new ArrayList<>();
     }
 
     private final ActivationFunction sigma = ActivationFunction.SIGMOID;
 
     private final ActivationFunction tanh = ActivationFunction.TANH;
 
-    private Matrix Wxz, Whz, Wxr, Whr, Wxo, Who, Why;
-
-    private Vector bz, br, bo, by;
-
-    //Next fields storage data about last feed forward step.
-    //These data use in the learning process
-    @EqualsAndHashCode.Exclude
-    private List<Vector> lastValuesH, lastValuesZ, lastValuesR, lastValuesO;
-
-    @EqualsAndHashCode.Exclude
-    private List<Vector> lastValuesZZ, lastValuesRR, lastValuesOO;
+    private final GruParameters parameters;
 
     private final int hiddenSize;
+
+    @Builder
+    @AllArgsConstructor
+    @NoArgsConstructor
+    private static class GruParameters {
+        private void updateWeights(Matrix d_Why, Matrix d_Who, Matrix d_Wxo, Matrix d_Whr, Matrix d_Wxr, Matrix d_Whz,
+                                   Matrix d_Wxz, Vector d_bz, Vector d_br, Vector d_bo, Vector d_by, double learningRate)
+                throws VectorMatrixException {
+            Why = Why.sub(d_Why.mul(learningRate));
+            by = by.sub(d_by.mul(learningRate));
+            Who = Who.sub(d_Who.mul(learningRate));
+            Wxo = Wxo.sub(d_Wxo.mul(learningRate));
+            bo = bo.sub(d_bo.mul(learningRate));
+            Whr = Whr.sub(d_Whr.mul(learningRate));
+            Wxr = Wxr.sub(d_Wxr.mul(learningRate));
+            br = br.sub(d_br.mul(learningRate));
+            Whz = Whz.sub(d_Whz.mul(learningRate));
+            Wxz = Wxz.sub(d_Wxz.mul(learningRate));
+            bz = bz.sub(d_bz.mul(learningRate));
+        }
+
+        private Matrix Wxz, Whz, Wxr, Whr, Wxo, Who, Why;
+
+        private Vector bz, br, bo, by;
+    }
+
+    private static class GruCache {
+
+        private GruCache() {
+            lastValuesH = new ArrayList<>();
+            lastValuesO = new ArrayList<>();
+            lastValuesZ = new ArrayList<>();
+            lastValuesR = new ArrayList<>();
+
+            lastValuesOO = new ArrayList<>();
+            lastValuesZZ = new ArrayList<>();
+            lastValuesRR = new ArrayList<>();
+
+            lastInputs = new ArrayList<>();
+            lastOutputs = new ArrayList<>();
+        }
+
+        @Getter
+        private final List<Vector> lastValuesH, lastValuesZ, lastValuesR, lastValuesO;
+
+        @Getter
+        private final List<Vector> lastValuesZZ, lastValuesRR, lastValuesOO;
+
+        @Getter
+        private List<Vector> lastInputs, lastOutputs;
+    }
 }

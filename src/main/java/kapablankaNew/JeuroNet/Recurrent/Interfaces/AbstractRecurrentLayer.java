@@ -51,7 +51,25 @@ public abstract class AbstractRecurrentLayer implements RecurrentLayer, Serializ
         }
     }
 
-    protected void updateOutputs() {
+    protected synchronized List<Vector> updateInputs(List<Vector> inputs) {
+        RecurrentLayerType layerType = topology.getRecurrentLayerType();
+        List<Vector> result = new ArrayList<>(inputs);
+        int outputCount = topology.getOutputCount();
+        int inputCount = inputs.size();
+        int inputSize = topology.getInputSize();
+        if (layerType == RecurrentLayerType.NO_INPUT) {
+            while(result.size() < outputCount) {
+                result.add(new Vector(inputSize));
+            }
+        } else if (layerType == RecurrentLayerType.NO_INPUT_NO_OUTPUT) {
+            while (result.size() < outputCount + inputCount - 1) {
+                result.add(new Vector(inputSize));
+            }
+        }
+        return result;
+    }
+
+    protected synchronized void updateOutputs() {
         RecurrentLayerType layerType = topology.getRecurrentLayerType();
         int outputCount = topology.getOutputCount();
         if (layerType == RecurrentLayerType.NO_OUTPUT || layerType == RecurrentLayerType.NO_INPUT_NO_OUTPUT) {
@@ -59,6 +77,18 @@ public abstract class AbstractRecurrentLayer implements RecurrentLayer, Serializ
                 lastOutputs.remove(0);
             }
         }
+    }
+
+    protected List<Vector> updateOutputs(List<Vector> outputs) {
+        List<Vector> result = new ArrayList<>(outputs);
+        RecurrentLayerType layerType = topology.getRecurrentLayerType();
+        int outputCount = topology.getOutputCount();
+        if (layerType == RecurrentLayerType.NO_OUTPUT || layerType == RecurrentLayerType.NO_INPUT_NO_OUTPUT) {
+            while (result.size() > outputCount) {
+                result.remove(0);
+            }
+        }
+        return result;
     }
 
     protected Matrix createWeightsMatrix(int rows, int columns) throws VectorMatrixException {
