@@ -24,7 +24,11 @@ import kapablankaNew.JeuroNet.Mathematical.Vector;
 import kapablankaNew.JeuroNet.Mathematical.VectorMatrixException;
 import kapablankaNew.JeuroNet.Mathematical.VectorType;
 import kapablankaNew.JeuroNet.Recurrent.Interfaces.AbstractRecurrentLayer;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.NonNull;
 
 import java.io.Serializable;
@@ -37,20 +41,25 @@ public class RnnLayer extends AbstractRecurrentLayer implements Serializable {
         super(topology);
         activationFunction = topology.getActivationFunction();
         hiddenSize = topology.getHiddenSize();
-        Whh = createWeightsMatrix(topology.getHiddenSize(), topology.getHiddenSize());
-        Wxh = createWeightsMatrix(topology.getHiddenSize(), topology.getInputSize());
-        Why = createWeightsMatrix(topology.getOutputSize(), topology.getHiddenSize());
-        bh = new Vector(topology.getHiddenSize(), VectorType.COLUMN);
-        by = new Vector(topology.getOutputSize(), VectorType.COLUMN);
+        parameters = new RnnParameters();
+        parameters.Whh = createWeightsMatrix(topology.getHiddenSize(), topology.getHiddenSize());
+        parameters.Wxh = createWeightsMatrix(topology.getHiddenSize(), topology.getInputSize());
+        parameters.Why = createWeightsMatrix(topology.getOutputSize(), topology.getHiddenSize());
+        parameters.bh = new Vector(topology.getHiddenSize(), VectorType.COLUMN);
+        parameters.by = new Vector(topology.getOutputSize(), VectorType.COLUMN);
     }
 
     @Override
-    public List<Vector> predict(List<Vector> inputSignals) throws VectorMatrixException {
+    public synchronized List<Vector> predict(List<Vector> inputSignals) throws VectorMatrixException {
+        Matrix Wxh = parameters.Wxh;
+        Matrix Whh = parameters.Whh;
+        Matrix Why = parameters.Why;
+        Vector bh = parameters.bh;
+        Vector by = parameters.by;
+
         lastInputs = new ArrayList<>(inputSignals);
         lastOutputs = new ArrayList<>();
         updateInputs();
-        lastValuesH = new ArrayList<>();
-        lastValuesZ = new ArrayList<>();
         Vector h = new Vector(hiddenSize, VectorType.COLUMN);
         Vector z;
         for (Vector inputSignal : lastInputs) {
@@ -65,16 +74,69 @@ public class RnnLayer extends AbstractRecurrentLayer implements Serializable {
             //yi = Why * hi + by
             Vector yi = (Why.mul(h)).add(by);
             lastOutputs.add(yi);
-            lastValuesH.add(h);
-            lastValuesZ.add(z);
         }
         updateOutputs();
         return new ArrayList<>(lastOutputs);
     }
 
+    private RnnCache predictInLearning(List<Vector> inputSignals, RnnParameters localParameters) throws VectorMatrixException {
+        Matrix Wxh = new Matrix(localParameters.Wxh);
+        Matrix Whh = new Matrix(localParameters.Whh);
+        Matrix Why = new Matrix(localParameters.Why);
+        Vector bh = new Vector(localParameters.bh);
+        Vector by = new Vector(localParameters.by);
+
+        var cache = new RnnCache();
+
+        cache.lastInputs = updateInputs(inputSignals);
+        cache.createArrays(cache.lastInputs.size());
+
+        List<Vector> outputs = new ArrayList<>();
+        Vector h = new Vector(hiddenSize, VectorType.COLUMN);
+        cache.lastValuesH[0] = h;
+        Vector z;
+        Vector first, second;
+        for (int i = 0; i < cache.lastInputs.size(); i++) {
+            var inputSignal = cache.lastInputs.get(i);
+            //Wxh * xi
+            first = Wxh.mul(inputSignal);
+            //Whh * h(i-1)
+            second = Whh.mul(h);
+            //Wxh * xi + Whh * h(i-1) + bh
+            z = first.add(second).add(bh);
+            //hi = AF(Wxh * xi + Whh * h(i-1) + bh)
+            h = activationFunction.function(z);
+            //yi = Why * hi + by
+            Vector yi = (Why.mul(h)).add(by);
+            outputs.add(yi);
+            cache.lastValuesZ[i] = z;
+            cache.lastValuesH[i + 1] = h;
+        }
+        cache.lastOutputs = updateOutputs(outputs);
+        return cache;
+    }
+
     @Override
-    public List<Vector> learn(List<Vector> inputSignals, List<Vector> errorsGradients) throws VectorMatrixException {
-        predict(inputSignals);
+    public synchronized List<Vector> learn(List<Vector> inputSignals, List<Vector> errorsGradients) throws VectorMatrixException {
+        Matrix Wxh = parameters.Wxh;
+        Matrix Whh = parameters.Whh;
+        Matrix Why = parameters.Why;
+        Vector bh = parameters.bh;
+        Vector by = parameters.by;
+
+        RnnParameters localParameters = RnnParameters.builder()
+                .Wxh(Wxh)
+                .Whh(Whh)
+                .Why(Why)
+                .bh(bh)
+                .by(by)
+                .build();
+
+        RnnCache cache = predictInLearning(inputSignals, localParameters);
+
+        Vector[] lastValuesH = cache.lastValuesH;
+        Vector[] lastValuesZ = cache.lastValuesZ;
+        List<Vector> inputs = cache.lastInputs;
 
         ActivationFunction AF = activationFunction;
         double learningRate = topology.getLearningRate();
@@ -95,19 +157,20 @@ public class RnnLayer extends AbstractRecurrentLayer implements Serializable {
             Vector d_y = new Vector(errorsGradients.get(errorsGradients.size() - 1 - i));
 
             //calculate values dE/dby and dE/dWhy
-            d_Why = d_Why.add(d_y.mul(lastValuesH.get(lastValuesH.size() - 1 - i).T()));
+            d_Why = d_Why.add(d_y.mul(lastValuesH[(lastValuesH.length - 1 - i)].T()));
             d_by = d_by.add(d_y);
 
             //it is special value: dE/dzi
-            Vector temp = Why.T().mul(d_y).mulElemByElem(AF.derivative(lastValuesZ.get(lastValuesZ.size() - 1 - i)));
+            Vector temp = Why.T().mul(d_y).mulElemByElem(AF.derivative(lastValuesZ[lastValuesZ.length - 1 - i]));
 
             for (int k = inputSignals.size() - 1 - i; k >= 0; k--) {
-                Vector h_k = lastValuesH.get(k);
-                Vector z_k = lastValuesZ.get(k);
+                Vector x_k = inputs.get(k);
+                Vector h_k = lastValuesH[k + 1];
+                Vector z_k = lastValuesZ[k];
 
                 //update gradient values
                 d_Whh = d_Whh.add(temp.mul(h_k.T()));
-                d_Wxh = d_Wxh.add(temp.mul(lastInputs.get(k).T()));
+                d_Wxh = d_Wxh.add(temp.mul(x_k.T()));
                 d_bh = d_bh.add(temp);
 
                 //update dE/dxi
@@ -132,34 +195,50 @@ public class RnnLayer extends AbstractRecurrentLayer implements Serializable {
             resultErrorsGradients.set(i, resultErrorsGradients.get(i).limit(-1.0, 1.0));
         }
         //update parameters of RNN
-        Why = Why.sub(d_Why.mul(learningRate));
-        by = by.sub(d_by.mul(learningRate));
-
-        Whh = Whh.sub(d_Whh.mul(learningRate));
-        Wxh = Wxh.sub(d_Wxh.mul(learningRate));
-        bh = bh.sub(d_bh.mul(learningRate));
+        parameters.updateWeights(d_Why, d_Whh, d_Wxh, d_by, d_bh, learningRate);
         return resultErrorsGradients;
     }
 
-    private Matrix Wxh;
-
-    private Matrix Whh;
-
-    private Matrix Why;
-
-    private Vector bh;
-
-    private Vector by;
-
-    //Next fields storage data about last feed forward step.
-    //These data use in the learning process
-    @EqualsAndHashCode.Exclude
-    private List<Vector> lastValuesH;
-
-    @EqualsAndHashCode.Exclude
-    private List<Vector> lastValuesZ;
-
     private final ActivationFunction activationFunction;
 
+    private final RnnParameters parameters;
+
     private final int hiddenSize;
+
+    @Builder
+    @AllArgsConstructor
+    @NoArgsConstructor
+    private static class RnnParameters implements Serializable {
+        private void updateWeights(Matrix d_Why, Matrix d_Whh, Matrix d_Wxh, Vector d_by, Vector d_bh,
+                                   double learningRate) throws VectorMatrixException {
+            Why = Why.sub(d_Why.mul(learningRate));
+            by = by.sub(d_by.mul(learningRate));
+            Whh = Whh.sub(d_Whh.mul(learningRate));
+            Wxh = Wxh.sub(d_Wxh.mul(learningRate));
+            bh = bh.sub(d_bh.mul(learningRate));
+        }
+
+        private Matrix Wxh, Whh, Why;
+
+        private Vector bh, by;
+    }
+
+    private static class RnnCache {
+        private RnnCache() {
+            lastInputs = new ArrayList<>();
+            lastOutputs = new ArrayList<>();
+        }
+
+        private void createArrays(int size) {
+            lastValuesH = new Vector[size+1];
+            lastValuesZ = new Vector[size];
+        }
+
+        @Getter
+        private Vector[] lastValuesH, lastValuesZ;
+        @Getter
+        private List<Vector> lastInputs;
+        @Getter
+        private List<Vector> lastOutputs;
+    }
 }

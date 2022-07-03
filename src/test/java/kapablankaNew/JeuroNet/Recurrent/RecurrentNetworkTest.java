@@ -46,20 +46,36 @@ public class RecurrentNetworkTest {
     public void learnRnnTest() throws VectorMatrixException, TopologyException {
         RnnLayerTopology topology = RnnLayerTopology.builder()
                 .inputSize(converter.getNumberUniqueWords())
+                .outputCount(20)
+                .outputSize(25)
+                .hiddenSize(20)
+                .learningRate(0.0001)
+                .activationFunction(ActivationFunction.TANH)
+                .recurrentLayerType(RecurrentLayerType.NO_INPUT)
+                .build();
+
+        RnnLayerTopology topology1 = RnnLayerTopology.builder()
+                .inputSize(25)
                 .outputCount(1)
                 .outputSize(2)
-                .hiddenSize(100)
+                .hiddenSize(20)
                 .learningRate(0.0001)
                 .activationFunction(ActivationFunction.TANH)
                 .recurrentLayerType(RecurrentLayerType.NO_OUTPUT)
                 .build();
 
-        List<RecurrentLayerTopology> topologies = List.of(topology);
+        List<RecurrentLayerTopology> topologies = List.of(topology, topology1);
         RecurrentNetwork recurrentNetwork = new RecurrentNetwork(topologies, LossFunction.MAE);
         recurrentNetwork.learn(train, 50);
-        double loss = calcLoss(recurrentNetwork, test);
+        //double loss = calcLoss(recurrentNetwork, test);
 
-        assertTrue(loss < 0.5);
+        for (int i = 0; i < 150; i++) {
+            recurrentNetwork.learnMulty(train, 1);
+            double loss = calcLoss(recurrentNetwork, train);
+            System.out.println(loss);
+        }
+
+        //assertTrue(loss < 0.5);
     }
 
     @Test

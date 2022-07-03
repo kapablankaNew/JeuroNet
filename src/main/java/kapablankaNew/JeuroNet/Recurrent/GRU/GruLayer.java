@@ -338,7 +338,7 @@ public class GruLayer extends AbstractRecurrentLayer implements Serializable {
     @Builder
     @AllArgsConstructor
     @NoArgsConstructor
-    private static class GruParameters {
+    private static class GruParameters implements Serializable {
         private void updateWeights(Matrix d_Why, Matrix d_Who, Matrix d_Wxo, Matrix d_Whr, Matrix d_Wxr, Matrix d_Whz,
                                    Matrix d_Wxz, Vector d_bz, Vector d_br, Vector d_bo, Vector d_by, double learningRate)
                 throws VectorMatrixException {
